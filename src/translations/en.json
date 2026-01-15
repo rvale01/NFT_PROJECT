@@ -1,0 +1,198 @@
+{
+  "common": {
+    "connectWallet": "Connect Wallet",
+    "createNFT": "Create NFT",
+    "marketplace": "Marketplace",
+    "dashboard": "Dashboard",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm"
+  },
+  "landing": {
+    "title": "Turn images into NFTs.",
+    "subtitle": "No upfront costs.",
+    "description": "Create and sell NFTs instantly with lazy minting. Your NFT is only minted when someone buys it—you never pay blockchain fees upfront.",
+    "createCTA": "Create NFT",
+    "exploreCTA": "Explore Marketplace",
+    "howItWorks": "How It Works",
+    "howItWorksDesc": "Simple, fast, and cost-effective. No technical knowledge required.",
+    "step1": {
+      "title": "Upload",
+      "description": "Choose your image and add details"
+    },
+    "step2": {
+      "title": "List",
+      "description": "Set your price and list instantly"
+    },
+    "step3": {
+      "title": "Sold",
+      "description": "Buyer purchases your NFT"
+    },
+    "step4": {
+      "title": "Minted",
+      "description": "NFT is minted on-chain automatically"
+    },
+    "whyChoose": "Why Choose AlgoNFT?",
+    "feature1": {
+      "title": "Eco-Friendly",
+      "description": "Algorand is carbon-negative. Your NFTs don't harm the planet."
+    },
+    "feature2": {
+      "title": "Lightning Fast",
+      "description": "Transactions complete in seconds, not minutes or hours."
+    },
+    "feature3": {
+      "title": "Secure & Reliable",
+      "description": "Built on Algorand's secure blockchain technology."
+    },
+    "lazyMinting": {
+      "title": "What is Lazy Minting?",
+      "description": "Traditional NFT creation requires you to pay blockchain fees upfront, even if your NFT never sells. With lazy minting, your NFT is prepared and listed instantly—but it only exists on the blockchain when someone buys it. The buyer pays the small minting fee (about $0.001), making it risk-free for creators."
+    },
+    "cta": {
+      "title": "Ready to Create Your First NFT?",
+      "description": "Join thousands of creators selling NFTs with zero upfront costs.",
+      "button": "Get Started Now"
+    }
+  },
+  "create": {
+    "title": "Create Your NFT",
+    "description": "Upload an image and prepare it for listing. Your NFT will be minted when someone buys it.",
+    "imageUpload": "Image",
+    "imagePlaceholder": "Drag & drop an image",
+    "imageClick": "or click to browse",
+    "nftName": "NFT Name",
+    "description": "Description",
+    "price": "Price (ALGO)",
+    "royalty": "Royalty Percentage (Optional)",
+    "royaltyHint": "Percentage you'll earn from future sales (0-100%)",
+    "lazyMintingInfo": {
+      "title": "About Lazy Minting",
+      "description": "This NFT will only be minted on the blockchain when someone buys it. The buyer pays a small fee (~{fee} {currency}) for minting. You pay nothing upfront."
+    },
+    "listForSale": "List for Sale",
+    "required": "required",
+    "characters": "characters",
+    "errors": {
+      "imageRequired": "Please upload an image",
+      "nameRequired": "NFT name is required",
+      "priceRequired": "Please enter a valid price",
+      "royaltyInvalid": "Royalty must be between 0 and 100%"
+    }
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "description": "Discover and collect unique NFTs created by artists around the world",
+    "searchPlaceholder": "Search NFTs by name or description...",
+    "allNFTs": "All NFTs",
+    "newestFirst": "Newest First",
+    "priceLowToHigh": "Price: Low to High",
+    "priceHighToLow": "Price: High to Low",
+    "nftFoundOne": "{count} NFT found",
+    "nftFoundMany": "{count} NFTs found",
+    "noNFTs": "No NFTs found",
+    "noResults": "Try adjusting your search or filters",
+    "beFirst": "Be the first to create an NFT!"
+  },
+  "nftDetail": {
+    "back": "Back",
+    "listed": "Listed for Sale",
+    "sold": "Sold",
+    "currentPrice": "Current Price",
+    "mintingFee": "Minting fee: ~{fee} {currency} (paid by buyer)",
+    "creator": "Creator",
+    "owner": "Owner",
+    "created": "Created",
+    "royalty": "Royalty",
+    "buyNow": "Buy Now",
+    "yourNFT": "This is your NFT. You cannot purchase it.",
+    "alreadySold": "This NFT has already been sold.",
+    "howItWorks": "How it works: When you click \"Buy Now\", this NFT will be minted on the Algorand blockchain and transferred to your wallet instantly. The minting fee (~{fee} {currency}) is included in the purchase.",
+    "confirmPurchase": "Confirm Purchase",
+    "modalNFT": "NFT",
+    "modalPrice": "Price",
+    "modalMintingFee": "Minting Fee",
+    "total": "Total",
+    "purchaseInfo": "You'll need to approve this transaction in your Pera Wallet. The NFT will be minted and transferred to your wallet upon confirmation.",
+    "processing": "Processing...",
+    "purchaseSuccess": {
+      "title": "Purchase Successful!",
+      "message": "Your NFT has been minted and transferred to your wallet!",
+      "viewDashboard": "You can view it in your dashboard.",
+      "button": "Go to Dashboard"
+    },
+    "connectToBuy": "You need to connect your Pera Wallet to purchase this NFT.",
+    "notFound": {
+      "heading": "NFT Not Found",
+      "description": "The NFT you're looking for doesn't exist.",
+      "backToMarketplace": "Back to Marketplace"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Manage your NFTs and track your collection",
+    "connectedWallet": "Connected Wallet",
+    "connectedWalletLabel": "Connected Wallet",
+    "myListings": "My Listings",
+    "myPurchases": "My Purchases",
+    "connectWallet": "Connect Your Wallet",
+    "connectDescription": "Connect your Pera Wallet to view your NFTs and manage your listings.",
+    "noListings": "No listings yet",
+    "noListingsDesc": "Start creating NFTs to see them here",
+    "createFirst": "Create Your First NFT",
+    "noPurchases": "No purchases yet",
+    "noPurchasesDesc": "Explore the marketplace to find NFTs you love",
+    "explore": "Explore Marketplace",
+    "deleteConfirm": {
+      "title": "Delete NFT?",
+      "message": "Are you sure you want to delete this NFT? This action cannot be undone. The NFT will be permanently removed from your listings.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "unlist": "Unlist"
+  },
+  "wallet": {
+    "connectRequired": "Connect Your Wallet",
+    "connectDescription": "You need to connect your wallet to list an NFT. We use Pera Wallet to securely manage your account on Algorand.",
+    "approveConnection": "Click below to connect your Pera Wallet. You'll need to approve the connection in your wallet app."
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "heading": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go Home",
+      "goBack": "Go Back"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "description": "We encountered an unexpected error. Please try refreshing the page.",
+      "refresh": "Refresh Page"
+    }
+  },
+  "toast": {
+    "nftCreated": "NFT listed successfully!",
+    "nftDeleted": "NFT deleted successfully",
+    "nftUnlisted": "NFT unlisted successfully",
+    "purchaseSuccess": "NFT purchased successfully!",
+    "createFailed": "Failed to create NFT. Please try again.",
+    "purchaseFailed": "Purchase failed. Please try again.",
+    "cantBuyOwn": "You can't buy your own NFT!"
+  },
+  "footer": {
+    "description": "Turn images into NFTs with zero upfront costs. Built on Algorand's fast, secure, and eco-friendly blockchain.",
+    "platform": "Platform",
+    "resources": "Resources",
+    "aboutAlgorand": "About Algorand",
+    "getPeraWallet": "Get Pera Wallet",
+    "allRightsReserved": "All rights reserved."
+  }
+}
+

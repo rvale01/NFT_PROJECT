@@ -1,0 +1,198 @@
+{
+  "common": {
+    "connectWallet": "连接钱包",
+    "createNFT": "创建NFT",
+    "marketplace": "市场",
+    "dashboard": "仪表板",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "search": "搜索",
+    "filter": "筛选",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认"
+  },
+  "landing": {
+    "title": "将图像转换为NFT。",
+    "subtitle": "无需预付费用。",
+    "description": "通过延迟铸造即时创建和销售NFT。您的NFT只有在有人购买时才会被铸造——您永远不必预先支付区块链费用。",
+    "createCTA": "创建NFT",
+    "exploreCTA": "探索市场",
+    "howItWorks": "工作原理",
+    "howItWorksDesc": "简单、快速且经济高效。无需技术知识。",
+    "step1": {
+      "title": "上传",
+      "description": "选择您的图像并添加详细信息"
+    },
+    "step2": {
+      "title": "上架",
+      "description": "设置价格并即时上架"
+    },
+    "step3": {
+      "title": "已售出",
+      "description": "买家购买您的NFT"
+    },
+    "step4": {
+      "title": "已铸造",
+      "description": "NFT自动在链上铸造"
+    },
+    "whyChoose": "为什么选择AlgoNFT？",
+    "feature1": {
+      "title": "环保",
+      "description": "Algorand是负碳排放的。您的NFT不会伤害地球。"
+    },
+    "feature2": {
+      "title": "闪电般快速",
+      "description": "交易在几秒内完成，而不是几分钟或几小时。"
+    },
+    "feature3": {
+      "title": "安全可靠",
+      "description": "基于Algorand的安全区块链技术构建。"
+    },
+    "lazyMinting": {
+      "title": "什么是延迟铸造？",
+      "description": "传统的NFT创建需要您预先支付区块链费用，即使您的NFT从未售出。通过延迟铸造，您的NFT可以即时准备和上架——但它只有在有人购买时才存在于区块链上。买家支付小额铸造费（约$0.001），使创作者零风险。"
+    },
+    "cta": {
+      "title": "准备好创建您的第一个NFT了吗？",
+      "description": "加入数千名零预付费用的NFT创作者行列。",
+      "button": "立即开始"
+    }
+  },
+  "create": {
+    "title": "创建您的NFT",
+    "description": "上传图像并准备上架。您的NFT将在有人购买时被铸造。",
+    "imageUpload": "图像",
+    "imagePlaceholder": "拖放图像",
+    "imageClick": "或点击浏览",
+    "nftName": "NFT名称",
+    "description": "描述",
+    "price": "价格 (ALGO)",
+    "royalty": "版税百分比（可选）",
+    "royaltyHint": "您将从未来销售中获得的百分比 (0-100%)",
+    "lazyMintingInfo": {
+      "title": "关于延迟铸造",
+      "description": "此NFT只有在有人购买时才会在区块链上铸造。买家支付小额铸造费（~{fee} {currency}）。您无需预付任何费用。"
+    },
+    "listForSale": "上架销售",
+    "required": "必填",
+    "characters": "字符",
+    "errors": {
+      "imageRequired": "请上传图像",
+      "nameRequired": "NFT名称是必填项",
+      "priceRequired": "请输入有效价格",
+      "royaltyInvalid": "版税必须在0到100%之间"
+    }
+  },
+  "marketplace": {
+    "title": "市场",
+    "description": "发现并收藏来自世界各地艺术家创作的独特NFT",
+    "searchPlaceholder": "按名称或描述搜索NFT...",
+    "allNFTs": "所有NFT",
+    "newestFirst": "最新优先",
+    "priceLowToHigh": "价格：从低到高",
+    "priceHighToLow": "价格：从高到低",
+    "nftFoundOne": "找到 {count} 个NFT",
+    "nftFoundMany": "找到 {count} 个NFT",
+    "noNFTs": "未找到NFT",
+    "noResults": "尝试调整您的搜索或筛选条件",
+    "beFirst": "成为第一个创建NFT的人！"
+  },
+  "nftDetail": {
+    "back": "返回",
+    "listed": "在售",
+    "sold": "已售出",
+    "currentPrice": "当前价格",
+    "mintingFee": "铸造费：~{fee} {currency}（由买家支付）",
+    "creator": "创作者",
+    "owner": "所有者",
+    "created": "创建时间",
+    "royalty": "版税",
+    "buyNow": "立即购买",
+    "yourNFT": "这是您的NFT。您无法购买它。",
+    "alreadySold": "此NFT已售出。",
+    "howItWorks": "工作原理：当您点击\"立即购买\"时，此NFT将在Algorand区块链上铸造并立即转移到您的钱包。铸造费（~{fee} {currency}）已包含在购买中。",
+    "confirmPurchase": "确认购买",
+    "modalNFT": "NFT",
+    "modalPrice": "价格",
+    "modalMintingFee": "铸造费",
+    "total": "总计",
+    "purchaseInfo": "您需要在Pera钱包中批准此交易。NFT将在确认后铸造并转移到您的钱包。",
+    "processing": "处理中...",
+    "purchaseSuccess": {
+      "title": "购买成功！",
+      "message": "您的NFT已铸造并转移到您的钱包！",
+      "viewDashboard": "您可以在仪表板中查看它。",
+      "button": "前往仪表板"
+    },
+    "connectToBuy": "您需要连接Pera钱包才能购买此NFT。",
+    "notFound": {
+      "heading": "未找到NFT",
+      "description": "您正在寻找的NFT不存在。",
+      "backToMarketplace": "返回市场"
+    }
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "description": "管理您的NFT并跟踪您的收藏",
+    "connectedWallet": "已连接钱包",
+    "connectedWalletLabel": "已连接钱包",
+    "myListings": "我的上架",
+    "myPurchases": "我的购买",
+    "connectWallet": "连接您的钱包",
+    "connectDescription": "连接您的Pera钱包以查看您的NFT并管理您的上架。",
+    "noListings": "暂无上架",
+    "noListingsDesc": "开始创建NFT以在此查看",
+    "createFirst": "创建您的第一个NFT",
+    "noPurchases": "暂无购买",
+    "noPurchasesDesc": "探索市场以找到您喜欢的NFT",
+    "explore": "探索市场",
+    "deleteConfirm": {
+      "title": "删除NFT？",
+      "message": "您确定要删除此NFT吗？此操作无法撤销。NFT将从您的上架中永久删除。",
+      "confirm": "删除",
+      "cancel": "取消"
+    },
+    "unlist": "取消上架"
+  },
+  "wallet": {
+    "connectRequired": "连接您的钱包",
+    "connectDescription": "您需要连接钱包才能上架NFT。我们使用Pera钱包安全地管理您在Algorand上的账户。",
+    "approveConnection": "点击下方连接您的Pera钱包。您需要在钱包应用中批准连接。"
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "heading": "页面未找到",
+      "description": "您正在寻找的页面不存在或已被移动。",
+      "goHome": "返回首页",
+      "goBack": "返回"
+    },
+    "generic": {
+      "title": "出了些问题",
+      "description": "我们遇到了意外错误。请尝试刷新页面。",
+      "refresh": "刷新页面"
+    }
+  },
+  "toast": {
+    "nftCreated": "NFT上架成功！",
+    "nftDeleted": "NFT删除成功",
+    "nftUnlisted": "NFT取消上架成功",
+    "purchaseSuccess": "NFT购买成功！",
+    "createFailed": "创建NFT失败。请重试。",
+    "purchaseFailed": "购买失败。请重试。",
+    "cantBuyOwn": "您不能购买自己的NFT！"
+  },
+  "footer": {
+    "description": "将图像转换为NFT，无需预付费用。基于Algorand快速、安全且环保的区块链构建。",
+    "platform": "平台",
+    "resources": "资源",
+    "aboutAlgorand": "关于Algorand",
+    "getPeraWallet": "获取Pera钱包",
+    "allRightsReserved": "版权所有。"
+  }
+}
+

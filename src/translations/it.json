@@ -1,0 +1,198 @@
+{
+  "common": {
+    "connectWallet": "Connetti Portafoglio",
+    "createNFT": "Crea NFT",
+    "marketplace": "Mercato",
+    "dashboard": "Dashboard",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "search": "Cerca",
+    "filter": "Filtra",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "confirm": "Conferma"
+  },
+  "landing": {
+    "title": "Trasforma le immagini in NFT.",
+    "subtitle": "Nessun costo anticipato.",
+    "description": "Crea e vendi NFT istantaneamente con il lazy minting. Il tuo NFT viene coniato solo quando qualcuno lo acquista—non paghi mai le commissioni blockchain in anticipo.",
+    "createCTA": "Crea NFT",
+    "exploreCTA": "Esplora il Mercato",
+    "howItWorks": "Come Funziona",
+    "howItWorksDesc": "Semplice, veloce ed economico. Nessuna conoscenza tecnica richiesta.",
+    "step1": {
+      "title": "Carica",
+      "description": "Scegli la tua immagine e aggiungi i dettagli"
+    },
+    "step2": {
+      "title": "Elenca",
+      "description": "Imposta il prezzo ed elenca istantaneamente"
+    },
+    "step3": {
+      "title": "Venduto",
+      "description": "L'acquirente compra il tuo NFT"
+    },
+    "step4": {
+      "title": "Coniato",
+      "description": "L'NFT viene coniato sulla blockchain automaticamente"
+    },
+    "whyChoose": "Perché Scegliere AlgoNFT?",
+    "feature1": {
+      "title": "Eco-Friendly",
+      "description": "Algorand è carbon-negative. I tuoi NFT non danneggiano il pianeta."
+    },
+    "feature2": {
+      "title": "Lampi di Velocità",
+      "description": "Le transazioni si completano in secondi, non minuti o ore."
+    },
+    "feature3": {
+      "title": "Sicuro e Affidabile",
+      "description": "Costruito sulla tecnologia blockchain sicura di Algorand."
+    },
+    "lazyMinting": {
+      "title": "Cos'è il Lazy Minting?",
+      "description": "La creazione tradizionale di NFT richiede il pagamento delle commissioni blockchain in anticipo, anche se il tuo NFT non viene mai venduto. Con il lazy minting, il tuo NFT viene preparato ed elencato istantaneamente—ma esiste sulla blockchain solo quando qualcuno lo acquista. L'acquirente paga la piccola commissione di conio (circa $0.001), rendendo l'operazione priva di rischi per i creatori."
+    },
+    "cta": {
+      "title": "Pronto a Creare il Tuo Primo NFT?",
+      "description": "Unisciti a migliaia di creatori che vendono NFT con zero costi anticipati.",
+      "button": "Inizia Ora"
+    }
+  },
+  "create": {
+    "title": "Crea il Tuo NFT",
+    "description": "Carica un'immagine e preparala per la vendita. Il tuo NFT sarà coniato quando qualcuno lo acquisterà.",
+    "imageUpload": "Immagine",
+    "imagePlaceholder": "Trascina e rilascia un'immagine",
+    "imageClick": "o clicca per sfogliare",
+    "nftName": "Nome NFT",
+    "description": "Descrizione",
+    "price": "Prezzo (ALGO)",
+    "royalty": "Percentuale Royalty (Opzionale)",
+    "royaltyHint": "Percentuale che guadagnerai dalle vendite future (0-100%)",
+    "lazyMintingInfo": {
+      "title": "Informazioni sul Lazy Minting",
+      "description": "Questo NFT sarà coniato sulla blockchain solo quando qualcuno lo acquisterà. L'acquirente paga una piccola commissione (~{fee} {currency}) per il conio. Tu non paghi nulla in anticipo."
+    },
+    "listForSale": "Metti in Vendita",
+    "required": "obbligatorio",
+    "characters": "caratteri",
+    "errors": {
+      "imageRequired": "Carica un'immagine",
+      "nameRequired": "Il nome dell'NFT è obbligatorio",
+      "priceRequired": "Inserisci un prezzo valido",
+      "royaltyInvalid": "La royalty deve essere tra 0 e 100%"
+    }
+  },
+  "marketplace": {
+    "title": "Mercato",
+    "description": "Scopri e colleziona NFT unici creati da artisti di tutto il mondo",
+    "searchPlaceholder": "Cerca NFT per nome o descrizione...",
+    "allNFTs": "Tutti gli NFT",
+    "newestFirst": "Più Recenti",
+    "priceLowToHigh": "Prezzo: Dal Basso all'Alto",
+    "priceHighToLow": "Prezzo: Dall'Alto al Basso",
+    "nftFoundOne": "{count} NFT trovato",
+    "nftFoundMany": "{count} NFT trovati",
+    "noNFTs": "Nessun NFT trovato",
+    "noResults": "Prova a modificare la tua ricerca o i filtri",
+    "beFirst": "Sii il primo a creare un NFT!"
+  },
+  "nftDetail": {
+    "back": "Indietro",
+    "listed": "In Vendita",
+    "sold": "Venduto",
+    "currentPrice": "Prezzo Attuale",
+    "mintingFee": "Commissione di conio: ~{fee} {currency} (pagata dall'acquirente)",
+    "creator": "Creatore",
+    "owner": "Proprietario",
+    "created": "Creato",
+    "royalty": "Royalty",
+    "buyNow": "Acquista Ora",
+    "yourNFT": "Questo è il tuo NFT. Non puoi acquistarlo.",
+    "alreadySold": "Questo NFT è già stato venduto.",
+    "howItWorks": "Come funziona: Quando clicchi \"Acquista Ora\", questo NFT sarà coniato sulla blockchain Algorand e trasferito al tuo portafoglio istantaneamente. La commissione di conio (~{fee} {currency}) è inclusa nell'acquisto.",
+    "confirmPurchase": "Conferma Acquisto",
+    "modalNFT": "NFT",
+    "modalPrice": "Prezzo",
+    "modalMintingFee": "Commissione di Conio",
+    "total": "Totale",
+    "purchaseInfo": "Dovrai approvare questa transazione nel tuo Pera Wallet. L'NFT sarà coniato e trasferito al tuo portafoglio dopo la conferma.",
+    "processing": "Elaborazione...",
+    "purchaseSuccess": {
+      "title": "Acquisto Riuscito!",
+      "message": "Il tuo NFT è stato coniato e trasferito al tuo portafoglio!",
+      "viewDashboard": "Puoi visualizzarlo nella tua dashboard.",
+      "button": "Vai alla Dashboard"
+    },
+    "connectToBuy": "Devi connettere il tuo Pera Wallet per acquistare questo NFT.",
+    "notFound": {
+      "heading": "NFT Non Trovato",
+      "description": "L'NFT che stai cercando non esiste.",
+      "backToMarketplace": "Torna al Mercato"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Gestisci i tuoi NFT e monitora la tua collezione",
+    "connectedWallet": "Portafoglio Connesso",
+    "connectedWalletLabel": "Portafoglio Connesso",
+    "myListings": "Le Mie Inserzioni",
+    "myPurchases": "I Miei Acquisti",
+    "connectWallet": "Connetti il Tuo Portafoglio",
+    "connectDescription": "Connetti il tuo Pera Wallet per visualizzare i tuoi NFT e gestire le tue inserzioni.",
+    "noListings": "Nessuna inserzione ancora",
+    "noListingsDesc": "Inizia a creare NFT per vederli qui",
+    "createFirst": "Crea il Tuo Primo NFT",
+    "noPurchases": "Nessun acquisto ancora",
+    "noPurchasesDesc": "Esplora il mercato per trovare NFT che ami",
+    "explore": "Esplora il Mercato",
+    "deleteConfirm": {
+      "title": "Eliminare NFT?",
+      "message": "Sei sicuro di voler eliminare questo NFT? Questa azione non può essere annullata. L'NFT sarà permanentemente rimosso dalle tue inserzioni.",
+      "confirm": "Elimina",
+      "cancel": "Annulla"
+    },
+    "unlist": "Rimuovi dalla Vendita"
+  },
+  "wallet": {
+    "connectRequired": "Connetti il Tuo Portafoglio",
+    "connectDescription": "Devi connettere il tuo portafoglio per elencare un NFT. Usiamo Pera Wallet per gestire in modo sicuro il tuo account su Algorand.",
+    "approveConnection": "Clicca qui sotto per connettere il tuo Pera Wallet. Dovrai approvare la connessione nell'app del portafoglio."
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "heading": "Pagina Non Trovata",
+      "description": "La pagina che stai cercando non esiste o è stata spostata.",
+      "goHome": "Vai alla Home",
+      "goBack": "Torna Indietro"
+    },
+    "generic": {
+      "title": "Qualcosa è andato storto",
+      "description": "Si è verificato un errore imprevisto. Prova a ricaricare la pagina.",
+      "refresh": "Ricarica la Pagina"
+    }
+  },
+  "toast": {
+    "nftCreated": "NFT elencato con successo!",
+    "nftDeleted": "NFT eliminato con successo",
+    "nftUnlisted": "NFT rimosso dalla vendita con successo",
+    "purchaseSuccess": "NFT acquistato con successo!",
+    "createFailed": "Impossibile creare l'NFT. Riprova.",
+    "purchaseFailed": "Acquisto fallito. Riprova.",
+    "cantBuyOwn": "Non puoi acquistare il tuo stesso NFT!"
+  },
+  "footer": {
+    "description": "Trasforma le immagini in NFT con zero costi anticipati. Costruito sulla blockchain veloce, sicura ed eco-compatibile di Algorand.",
+    "platform": "Piattaforma",
+    "resources": "Risorse",
+    "aboutAlgorand": "Informazioni su Algorand",
+    "getPeraWallet": "Scarica Pera Wallet",
+    "allRightsReserved": "Tutti i diritti riservati."
+  }
+}
+
