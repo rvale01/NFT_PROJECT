@@ -17,7 +17,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
     "@perawallet/connect": "^1.2.1",
-    "algosdk": "^2.7.0",
+    "algosdk": "^3.0.0",
     "axios": "^1.6.2",
     "lucide-react": "^0.294.0",
     "react-dropzone": "^14.2.3",
