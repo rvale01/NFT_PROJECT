@@ -26,10 +26,9 @@ export interface PinataResponse {
   IpfsHash: string
 }
 
-// Helper to upload image to IPFS via Pinata pinning service.
-// Requires VITE_PINATA_JWT to be set in the environment. If the token is not
-// configured the function falls back to returning a local data URL so the app
-// remains usable during development without credentials.
+// Upload image — uses Pinata IPFS if JWT is configured, otherwise falls back
+// to the local backend server (which serves a short URL safe for Algorand's
+// 96-byte assetURL limit).
 export const uploadToIPFS = async (file: File): Promise<string> => {
   const pinataJwt = import.meta.env.VITE_PINATA_JWT as string | undefined
 
@@ -39,9 +38,7 @@ export const uploadToIPFS = async (file: File): Promise<string> => {
 
     const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${pinataJwt}`,
-      },
+      headers: { Authorization: `Bearer ${pinataJwt}` },
       body: formData,
     })
 
@@ -53,14 +50,21 @@ export const uploadToIPFS = async (file: File): Promise<string> => {
     return `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`
   }
 
-  // Fallback: return a data URL when no Pinata JWT is configured
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      resolve(reader.result as string)
-    }
-    reader.readAsDataURL(file)
+  // Fallback: upload to the local backend so we get a short URL
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch('http://localhost:3001/api/upload', {
+    method: 'POST',
+    body: formData,
   })
+
+  if (!response.ok) {
+    throw new Error('Image upload to backend failed')
+  }
+
+  const data = await response.json() as { url: string }
+  return data.url
 }
 
 export interface NFTMetadata {
@@ -112,7 +116,7 @@ export const mintNFT = async (
       clawback: undefined,
       unitName: unitName.substring(0, 8), // Max 8 chars
       assetName: name.substring(0, 32), // Max 32 chars
-      assetURL: metadataUrl.length <= 96 ? metadataUrl : undefined, // Max 96 bytes
+      assetURL: metadataUrl,
       assetMetadataHash: undefined,
     })
 
