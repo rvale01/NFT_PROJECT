@@ -4,9 +4,9 @@ import { PeraWalletConnect } from '@perawallet/connect'
 
 // Algorand configuration
 const ALGOD_TOKEN = ''
-const ALGOD_SERVER = 'https://mainnet-api.algonode.cloud'
+const ALGOD_SERVER = 'https://testnet-api.algonode.cloud'
 const ALGOD_PORT = 443
-const INDEXER_SERVER = 'https://mainnet-idx.algonode.cloud'
+const INDEXER_SERVER = 'https://testnet-idx.algonode.cloud'
 const INDEXER_PORT = 443
 
 // Initialize clients

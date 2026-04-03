@@ -5,7 +5,7 @@ import { PeraWalletConnect } from '@perawallet/connect'
 let peraWallet: PeraWalletConnect | null = null
 try {
   peraWallet = new PeraWalletConnect({
-    chainId: 416001, // Algorand Mainnet
+    chainId: 416002, // Algorand Testnet
   })
 } catch (error) {
   console.warn('PeraWalletConnect initialization failed:', error)
