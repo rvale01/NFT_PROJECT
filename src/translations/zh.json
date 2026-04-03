@@ -166,7 +166,10 @@
     "relistPrice": "价格（ALGO）",
     "relistConfirm": "上架出售",
     "relistSuccess": "NFT已上架出售",
-    "relistFailed": "NFT上架失败"
+    "relistFailed": "NFT上架失败",
+    "transferNFT": "转移NFT给买家",
+    "assetSentSuccess": "NFT已转移给买家",
+    "assetSentFailed": "转移失败"
   },
   "wallet": {
     "connectRequired": "连接您的钱包",

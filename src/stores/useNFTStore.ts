@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { mintAndPay, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
+import { mintAndPay, optInAndPay, sendAsset, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
 import { API_URL } from '../utils/constants'
 
 export type NFTStatus = 'listed' | 'sold' | 'minted'
@@ -18,6 +18,7 @@ export interface NFT {
   createdAt: string
   purchasedAt?: string
   assetId?: number
+  assetTransferred?: boolean
 }
 
 interface CreateNFTData {
@@ -83,6 +84,7 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
     if ('owner' in updates) body.owner = updates.owner ?? null
     if (updates.status !== undefined) body.status = updates.status
     if ('purchasedAt' in updates) body.purchasedAt = updates.purchasedAt ?? null
+    if ('assetTransferred' in updates) body.assetTransferred = updates.assetTransferred
     if (updates.assetId !== undefined) body.assetId = updates.assetId
 
     const res = await fetch(`${API_URL}/nfts/${id}`, {
@@ -129,25 +131,32 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
     const nft = get().nfts.find((n) => n.id === id)
     if (!nft) return false
 
-    // Lazy minting: mint the ASA and pay the seller atomically in one group tx.
-    let assetId: number | undefined
     if (peraWallet && buyerAddress) {
-      const { assetId: id } = await mintAndPay(
-        peraWallet,
-        buyerAddress,
-        nft.creator,
-        nft.price,
-        nft.id,
-        nft.name,
-      )
-      assetId = id
+      if (nft.assetId) {
+        // Resale: existing ASA — buyer opts-in and pays seller atomically.
+        // The seller must separately transfer the ASA (see sendAsset / "Transfer NFT" in dashboard).
+        await optInAndPay(peraWallet, buyerAddress, nft.creator, nft.price, nft.assetId)
+      } else {
+        // First sale: lazy mint — create the ASA and pay the seller atomically.
+        const { assetId: newAssetId } = await mintAndPay(
+          peraWallet, buyerAddress, nft.creator, nft.price, nft.id, nft.name,
+        )
+        await get().updateNFT(id, {
+          status: 'minted',
+          owner: buyerAddress,
+          purchasedAt: new Date().toISOString(),
+          assetId: newAssetId,
+          assetTransferred: true, // minted directly to buyer, no separate transfer needed
+        })
+        return true
+      }
     }
 
     await get().updateNFT(id, {
       status: 'minted',
       owner: buyerAddress,
       purchasedAt: new Date().toISOString(),
-      ...(assetId !== undefined && { assetId }),
+      assetTransferred: false, // seller still needs to send the ASA
     })
 
     return true

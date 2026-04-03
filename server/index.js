@@ -46,6 +46,7 @@ function rowToNFT(row) {
     createdAt: row.created_at,
     purchasedAt: row.purchased_at,
     assetId: row.asset_id,
+    assetTransferred: row.asset_transferred === 1,
   }
 }
 
@@ -130,7 +131,7 @@ app.patch('/api/nfts/:id', (req, res) => {
     const existing = db.prepare('SELECT * FROM nfts WHERE id = ?').get(req.params.id)
     if (!existing) return res.status(404).json({ error: 'NFT not found' })
 
-    const { name, description, price, royalty, imageUrl, creator, owner, status, purchasedAt, assetId } = req.body
+    const { name, description, price, royalty, imageUrl, creator, owner, status, purchasedAt, assetId, assetTransferred } = req.body
 
     const updated = {
       name: name ?? existing.name,
@@ -143,16 +144,17 @@ app.patch('/api/nfts/:id', (req, res) => {
       status: status ?? existing.status,
       purchased_at: purchasedAt !== undefined ? purchasedAt : existing.purchased_at,
       asset_id: assetId !== undefined ? assetId : existing.asset_id,
+      asset_transferred: assetTransferred !== undefined ? (assetTransferred ? 1 : 0) : existing.asset_transferred,
     }
 
     db.prepare(`
       UPDATE nfts SET
         name = ?, description = ?, price = ?, royalty = ?, image_url = ?,
-        creator = ?, owner = ?, status = ?, purchased_at = ?, asset_id = ?
+        creator = ?, owner = ?, status = ?, purchased_at = ?, asset_id = ?, asset_transferred = ?
       WHERE id = ?
     `).run(
       updated.name, updated.description, updated.price, updated.royalty, updated.image_url,
-      updated.creator, updated.owner, updated.status, updated.purchased_at, updated.asset_id,
+      updated.creator, updated.owner, updated.status, updated.purchased_at, updated.asset_id, updated.asset_transferred,
       req.params.id
     )
 

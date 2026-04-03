@@ -20,8 +20,16 @@ db.exec(`
     status TEXT,
     created_at TEXT,
     purchased_at TEXT,
-    asset_id INTEGER
+    asset_id INTEGER,
+    asset_transferred INTEGER DEFAULT 1
   )
 `)
+
+// Add asset_transferred column to existing DBs that don't have it yet
+try {
+  db.exec(`ALTER TABLE nfts ADD COLUMN asset_transferred INTEGER DEFAULT 1`)
+} catch {
+  // Column already exists — safe to ignore
+}
 
 export default db

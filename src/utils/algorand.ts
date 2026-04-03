@@ -153,6 +153,64 @@ export const transferNFT = async (
   }
 }
 
+// Resale: buyer opts-in to existing ASA and pays seller atomically (buyer signs)
+export const optInAndPay = async (
+  peraWallet: PeraWalletConnect,
+  buyerAddress: string,
+  sellerAddress: string,
+  priceAlgo: number,
+  assetId: number,
+): Promise<void> => {
+  const suggestedParams = await algodClient.getTransactionParams().do()
+
+  // Opt-in: buyer sends 0 of the asset to themselves to accept it
+  const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    sender: buyerAddress,
+    receiver: buyerAddress,
+    amount: 0,
+    assetIndex: assetId,
+    suggestedParams,
+  })
+
+  const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    sender: buyerAddress,
+    receiver: sellerAddress,
+    amount: algoToMicroalgos(priceAlgo),
+    suggestedParams,
+  })
+
+  algosdk.assignGroupID([optInTxn, payTxn])
+
+  const signedTxns = await peraWallet.signTransaction([
+    [{ txn: optInTxn, signers: [buyerAddress] }, { txn: payTxn, signers: [buyerAddress] }],
+  ])
+
+  const { txid } = await algodClient.sendRawTransaction(signedTxns).do()
+  await algosdk.waitForConfirmation(algodClient, txid, 4)
+}
+
+// Resale: seller transfers the existing ASA to the buyer (seller signs)
+export const sendAsset = async (
+  peraWallet: PeraWalletConnect,
+  sellerAddress: string,
+  buyerAddress: string,
+  assetId: number,
+): Promise<void> => {
+  const suggestedParams = await algodClient.getTransactionParams().do()
+
+  const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    sender: sellerAddress,
+    receiver: buyerAddress,
+    amount: 1,
+    assetIndex: assetId,
+    suggestedParams,
+  })
+
+  const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [sellerAddress] }]])
+  const { txid } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  await algosdk.waitForConfirmation(algodClient, txid, 4)
+}
+
 // Destroy (delete) an NFT ASA from the blockchain
 export const destroyNFT = async (
   wallet: string,

@@ -166,7 +166,10 @@
     "relistPrice": "Price (ALGO)",
     "relistConfirm": "List for Sale",
     "relistSuccess": "NFT listed for sale",
-    "relistFailed": "Failed to list NFT"
+    "relistFailed": "Failed to list NFT",
+    "transferNFT": "Transfer NFT to Buyer",
+    "assetSentSuccess": "NFT transferred to buyer",
+    "assetSentFailed": "Transfer failed"
   },
   "wallet": {
     "connectRequired": "Connect Your Wallet",

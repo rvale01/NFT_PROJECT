@@ -166,7 +166,10 @@
     "relistPrice": "Prezzo (ALGO)",
     "relistConfirm": "Metti in Vendita",
     "relistSuccess": "NFT messo in vendita",
-    "relistFailed": "Impossibile mettere in vendita l'NFT"
+    "relistFailed": "Impossibile mettere in vendita l'NFT",
+    "transferNFT": "Trasferisci NFT all'Acquirente",
+    "assetSentSuccess": "NFT trasferito all'acquirente",
+    "assetSentFailed": "Trasferimento fallito"
   },
   "wallet": {
     "connectRequired": "Connetti il Tuo Portafoglio",
