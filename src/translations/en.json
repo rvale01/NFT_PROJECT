@@ -159,7 +159,14 @@
     "unlist": "Unlist",
     "mySales": "My Sales",
     "noSales": "No sales yet",
-    "noSalesDesc": "NFTs you've created and sold will appear here"
+    "noSalesDesc": "NFTs you've created and sold will appear here",
+    "listForSale": "List for Sale",
+    "relistTitle": "List for Sale",
+    "relistDescription": "Set a new price to re-list this NFT on the marketplace.",
+    "relistPrice": "Price (ALGO)",
+    "relistConfirm": "List for Sale",
+    "relistSuccess": "NFT listed for sale",
+    "relistFailed": "Failed to list NFT"
   },
   "wallet": {
     "connectRequired": "Connect Your Wallet",

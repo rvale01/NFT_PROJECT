@@ -36,6 +36,9 @@ const DashboardPage: React.FC = () => {
   const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<TabType>('listed')
   const [deleteConfirm, setDeleteConfirm] = useState<NFT | null>(null)
+  const [relistNFT, setRelistNFT] = useState<NFT | null>(null)
+  const [relistPrice, setRelistPrice] = useState('')
+  const [isRelisting, setIsRelisting] = useState(false)
 
   if (!isConnected) {
     return (
@@ -77,6 +80,34 @@ const DashboardPage: React.FC = () => {
   const handleUnlist = (nft: NFT) => {
     updateNFT(nft.id, { status: 'sold' })
     info(t('toast.nftUnlisted'))
+  }
+
+  const handleRelistOpen = (nft: NFT) => {
+    setRelistNFT(nft)
+    setRelistPrice(String(nft.price))
+  }
+
+  const handleRelistConfirm = async () => {
+    if (!relistNFT || !account) return
+    const price = parseFloat(relistPrice)
+    if (!price || price <= 0) return
+    setIsRelisting(true)
+    try {
+      await updateNFT(relistNFT.id, {
+        status: 'listed',
+        creator: account,
+        owner: undefined,
+        price,
+        purchasedAt: undefined,
+      })
+      success(t('dashboard.relistSuccess'))
+      setRelistNFT(null)
+      setRelistPrice('')
+    } catch {
+      error(t('dashboard.relistFailed'))
+    } finally {
+      setIsRelisting(false)
+    }
   }
 
   return (
@@ -194,7 +225,18 @@ const DashboardPage: React.FC = () => {
             {purchased.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {purchased.map((nft) => (
-                  <NFTCard key={nft.id} nft={nft} />
+                  <div key={nft.id} className="relative group">
+                    <NFTCard nft={nft} />
+                    <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleRelistOpen(nft)}
+                        className="bg-primary-600 text-white p-2 rounded-lg hover:bg-primary-700 transition-colors shadow-lg"
+                        title={t('dashboard.listForSale')}
+                      >
+                        <Tag size={16} />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -237,6 +279,44 @@ const DashboardPage: React.FC = () => {
             )}
           </div>
         )}
+
+      {/* Relist Modal */}
+      <Modal
+        isOpen={!!relistNFT}
+        onClose={() => { setRelistNFT(null); setRelistPrice('') }}
+        title={t('dashboard.relistTitle')}
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">{t('dashboard.relistDescription')}</p>
+          {relistNFT && (
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="font-semibold text-gray-900">{relistNFT.name}</p>
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('dashboard.relistPrice')}
+            </label>
+            <input
+              type="number"
+              value={relistPrice}
+              onChange={(e) => setRelistPrice(e.target.value)}
+              step="0.1"
+              min="0"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="10"
+            />
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" className="flex-1" onClick={() => { setRelistNFT(null); setRelistPrice('') }}>
+              {t('common.cancel')}
+            </Button>
+            <Button className="flex-1" onClick={handleRelistConfirm} disabled={isRelisting || !relistPrice || parseFloat(relistPrice) <= 0}>
+              {t('dashboard.relistConfirm')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal

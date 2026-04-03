@@ -80,9 +80,9 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
     if (updates.royalty !== undefined) body.royalty = updates.royalty
     if (updates.imageUrl !== undefined) body.imageUrl = updates.imageUrl
     if (updates.creator !== undefined) body.creator = updates.creator
-    if (updates.owner !== undefined) body.owner = updates.owner
+    if ('owner' in updates) body.owner = updates.owner ?? null
     if (updates.status !== undefined) body.status = updates.status
-    if (updates.purchasedAt !== undefined) body.purchasedAt = updates.purchasedAt
+    if ('purchasedAt' in updates) body.purchasedAt = updates.purchasedAt ?? null
     if (updates.assetId !== undefined) body.assetId = updates.assetId
 
     const res = await fetch(`${API_URL}/nfts/${id}`, {

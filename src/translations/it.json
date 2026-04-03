@@ -159,7 +159,14 @@
     "unlist": "Rimuovi dalla Vendita",
     "mySales": "Le Mie Vendite",
     "noSales": "Nessuna vendita ancora",
-    "noSalesDesc": "Gli NFT che hai creato e venduto appariranno qui"
+    "noSalesDesc": "Gli NFT che hai creato e venduto appariranno qui",
+    "listForSale": "Metti in Vendita",
+    "relistTitle": "Metti in Vendita",
+    "relistDescription": "Imposta un nuovo prezzo per rimettere questo NFT sul mercato.",
+    "relistPrice": "Prezzo (ALGO)",
+    "relistConfirm": "Metti in Vendita",
+    "relistSuccess": "NFT messo in vendita",
+    "relistFailed": "Impossibile mettere in vendita l'NFT"
   },
   "wallet": {
     "connectRequired": "Connetti il Tuo Portafoglio",

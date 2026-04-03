@@ -159,7 +159,14 @@
     "unlist": "取消上架",
     "mySales": "我的销售",
     "noSales": "暂无销售",
-    "noSalesDesc": "您创建并出售的NFT将显示在这里"
+    "noSalesDesc": "您创建并出售的NFT将显示在这里",
+    "listForSale": "上架出售",
+    "relistTitle": "上架出售",
+    "relistDescription": "设置新价格以将此NFT重新上架。",
+    "relistPrice": "价格（ALGO）",
+    "relistConfirm": "上架出售",
+    "relistSuccess": "NFT已上架出售",
+    "relistFailed": "NFT上架失败"
   },
   "wallet": {
     "connectRequired": "连接您的钱包",
