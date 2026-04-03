@@ -169,7 +169,9 @@
     "relistFailed": "Failed to list NFT",
     "transferNFT": "Transfer NFT to Buyer",
     "assetSentSuccess": "NFT transferred to buyer",
-    "assetSentFailed": "Transfer failed"
+    "assetSentFailed": "Transfer failed",
+    "pendingTransferTitle": "Action required — transfer NFT to buyer",
+    "pendingTransferDesc": "You have sold NFTs that are still in your wallet. Sign the transfer to send them to the buyer."
   },
   "wallet": {
     "connectRequired": "Connect Your Wallet",

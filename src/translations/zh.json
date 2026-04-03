@@ -169,7 +169,9 @@
     "relistFailed": "NFT上架失败",
     "transferNFT": "转移NFT给买家",
     "assetSentSuccess": "NFT已转移给买家",
-    "assetSentFailed": "转移失败"
+    "assetSentFailed": "转移失败",
+    "pendingTransferTitle": "需要操作 — 将NFT转移给买家",
+    "pendingTransferDesc": "您已出售的NFT仍在您的钱包中。请签署转移以将其发送给买家。"
   },
   "wallet": {
     "connectRequired": "连接您的钱包",

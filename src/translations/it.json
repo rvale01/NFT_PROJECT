@@ -169,7 +169,9 @@
     "relistFailed": "Impossibile mettere in vendita l'NFT",
     "transferNFT": "Trasferisci NFT all'Acquirente",
     "assetSentSuccess": "NFT trasferito all'acquirente",
-    "assetSentFailed": "Trasferimento fallito"
+    "assetSentFailed": "Trasferimento fallito",
+    "pendingTransferTitle": "Azione richiesta — trasferisci l'NFT all'acquirente",
+    "pendingTransferDesc": "Hai venduto degli NFT che sono ancora nel tuo portafoglio. Firma il trasferimento per inviarli all'acquirente."
   },
   "wallet": {
     "connectRequired": "Connetti il Tuo Portafoglio",
