@@ -1,4 +1,6 @@
 import algosdk from 'algosdk'
+import type { PendingTransactionResponse } from 'algosdk/dist/types/client/v2/algod/models/types'
+import { PeraWalletConnect } from '@perawallet/connect'
 
 // Algorand configuration
 const ALGOD_TOKEN = ''
@@ -20,12 +22,16 @@ export const indexerClient = new algosdk.Indexer(
   INDEXER_PORT
 )
 
+export interface PinataResponse {
+  IpfsHash: string
+}
+
 // Helper to upload image to IPFS via Pinata pinning service.
 // Requires VITE_PINATA_JWT to be set in the environment. If the token is not
 // configured the function falls back to returning a local data URL so the app
 // remains usable during development without credentials.
-export const uploadToIPFS = async (file) => {
-  const pinataJwt = import.meta.env.VITE_PINATA_JWT
+export const uploadToIPFS = async (file: File): Promise<string> => {
+  const pinataJwt = (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env.VITE_PINATA_JWT
 
   if (pinataJwt) {
     const formData = new FormData()
@@ -43,7 +49,7 @@ export const uploadToIPFS = async (file) => {
       throw new Error(`Pinata upload failed: ${response.status} ${response.statusText}`)
     }
 
-    const data = await response.json()
+    const data = await response.json() as PinataResponse
     return `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`
   }
 
@@ -51,14 +57,28 @@ export const uploadToIPFS = async (file) => {
   return new Promise((resolve) => {
     const reader = new FileReader()
     reader.onloadend = () => {
-      resolve(reader.result)
+      resolve(reader.result as string)
     }
     reader.readAsDataURL(file)
   })
 }
 
+export interface NFTMetadata {
+  name: string
+  description?: string
+  image: string
+  properties: {
+    royalty: number
+  }
+}
+
 // Create NFT metadata
-export const createNFTMetadata = (name, description, imageUrl, royalty = 0) => {
+export const createNFTMetadata = (
+  name: string,
+  description: string | undefined,
+  imageUrl: string,
+  royalty = 0
+): NFTMetadata => {
   return {
     name,
     description,
@@ -70,13 +90,18 @@ export const createNFTMetadata = (name, description, imageUrl, royalty = 0) => {
 }
 
 // Mint NFT as ASA (Algorand Standard Asset)
-export const mintNFT = async (wallet, metadataUrl, name, unitName = 'NFT') => {
+export const mintNFT = async (
+  wallet: string,
+  metadataUrl: string,
+  name: string,
+  unitName = 'NFT'
+): Promise<algosdk.Transaction> => {
   try {
     const suggestedParams = await algodClient.getTransactionParams().do()
 
-    // Create NFT ASA
+    // Create NFT ASA (algosdk v3 uses 'sender' instead of 'from')
     const txn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
-      from: wallet,
+      sender: wallet,
       suggestedParams,
       total: 1, // NFTs are always 1-of-1
       decimals: 0,
@@ -99,13 +124,18 @@ export const mintNFT = async (wallet, metadataUrl, name, unitName = 'NFT') => {
 }
 
 // Transfer NFT
-export const transferNFT = async (wallet, assetId, recipient) => {
+export const transferNFT = async (
+  wallet: string,
+  assetId: number,
+  recipient: string
+): Promise<algosdk.Transaction> => {
   try {
     const suggestedParams = await algodClient.getTransactionParams().do()
 
+    // algosdk v3 uses 'sender'/'receiver' instead of 'from'/'to'
     const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: wallet,
-      to: recipient,
+      sender: wallet,
+      receiver: recipient,
       amount: 1,
       assetIndex: assetId,
       suggestedParams,
@@ -119,27 +149,31 @@ export const transferNFT = async (wallet, assetId, recipient) => {
 }
 
 // Sign and submit a transaction using Pera Wallet, then wait for confirmation
-export const signAndSubmitTransaction = async (peraWallet, txn, signerAddress) => {
+export const signAndSubmitTransaction = async (
+  peraWallet: PeraWalletConnect,
+  txn: algosdk.Transaction,
+  signerAddress: string
+): Promise<PendingTransactionResponse> => {
   // Sign the transaction via Pera Wallet
   const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [signerAddress] }]])
 
   // signedTxns is an array of Uint8Array; send the first one
-  const { txId } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  // algosdk v3: sendRawTransaction returns PostTransactionsResponse with .txid (lowercase)
+  const result = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  const txid: string = result.txid
 
   // Wait up to 4 rounds for confirmation
-  const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4)
+  const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txid, 4)
 
   return confirmedTxn
 }
 
 // Format ALGO amount
-export const formatAlgo = (microalgos) => {
+export const formatAlgo = (microalgos: number): string => {
   return (microalgos / 1000000).toFixed(6)
 }
 
 // Convert ALGO to microalgos
-export const algoToMicroalgos = (algos) => {
+export const algoToMicroalgos = (algos: number): number => {
   return Math.round(algos * 1000000)
 }
-
-

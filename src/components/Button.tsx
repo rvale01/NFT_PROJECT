@@ -1,4 +1,16 @@
-const Button = ({
+import React from 'react'
+
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost'
+type ButtonSize = 'sm' | 'md' | 'lg'
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode
+  variant?: ButtonVariant
+  size?: ButtonSize
+  className?: string
+}
+
+const Button: React.FC<ButtonProps> = ({
   children,
   onClick,
   variant = 'primary',
@@ -11,7 +23,7 @@ const Button = ({
   const baseStyles =
     'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
 
-  const variants = {
+  const variants: Record<ButtonVariant, string> = {
     primary:
       'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
     secondary:
@@ -21,7 +33,7 @@ const Button = ({
     ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
   }
 
-  const sizes = {
+  const sizes: Record<ButtonSize, string> = {
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2 text-base',
     lg: 'px-6 py-3 text-lg',
@@ -41,5 +53,3 @@ const Button = ({
 }
 
 export default Button
-
-

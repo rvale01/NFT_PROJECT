@@ -4,9 +4,9 @@ import { useI18nStore } from '../stores/useI18nStore'
 import Button from './Button'
 
 // Error display component that can use hooks
-const ErrorDisplay = () => {
+const ErrorDisplay: React.FC = () => {
   const t = useI18nStore((state) => state.t)
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="text-center max-w-md">
@@ -34,7 +34,7 @@ const ErrorDisplay = () => {
           <Button
             size="lg"
             variant="outline"
-            onClick={() => window.location.href = '/'}
+            onClick={() => { window.location.href = '/' }}
           >
             {t('errors.notFound.goHome')}
           </Button>
@@ -44,21 +44,30 @@ const ErrorDisplay = () => {
   )
 }
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+interface ErrorBoundaryProps {
+  children: React.ReactNode
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean
+  error: Error | null
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('Error caught by boundary:', error, errorInfo)
   }
 
-  render() {
+  render(): React.ReactNode {
     if (this.state.hasError) {
       return <ErrorDisplay />
     }
@@ -68,5 +77,3 @@ class ErrorBoundary extends React.Component {
 }
 
 export default ErrorBoundary
-
-

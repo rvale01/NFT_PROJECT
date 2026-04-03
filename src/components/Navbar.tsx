@@ -5,7 +5,7 @@ import { useWalletStore } from '../stores/useWalletStore'
 import { useI18n } from '../stores/useI18nStore'
 import LanguageSwitcher from './LanguageSwitcher'
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   const account = useWalletStore((state) => state.account)
   const isConnected = useWalletStore((state) => state.isConnected)
   const connect = useWalletStore((state) => state.connect)
@@ -22,10 +22,13 @@ const Navbar = () => {
     }
   }
 
-  const formatAddress = (address) => {
+  const formatAddress = (address: string | null): string => {
     if (!address) return ''
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
+
+  // Suppress unused navigate warning – kept for potential future use
+  void navigate
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
@@ -125,5 +128,3 @@ const Navbar = () => {
 }
 
 export default Navbar
-
-

@@ -12,7 +12,7 @@ import NFTDetailPage from './pages/NFTDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { useWalletStore } from './stores/useWalletStore'
 
-function App() {
+function App(): React.ReactElement {
   const initializeWallet = useWalletStore((state) => state.initialize)
 
   useEffect(() => {
@@ -44,4 +44,3 @@ function App() {
 }
 
 export default App
-

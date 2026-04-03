@@ -10,7 +10,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { useWalletStore } from '../stores/useWalletStore'
-import { useNFTStore } from '../stores/useNFTStore'
+import { useNFTStore, NFT } from '../stores/useNFTStore'
 import { useToastStore } from '../stores/useToastStore'
 import { useI18n } from '../stores/useI18nStore'
 import { formatAddress } from '../utils/helpers'
@@ -18,7 +18,9 @@ import NFTCard from '../components/NFTCard'
 import Button from '../components/Button'
 import Modal from '../components/Modal'
 
-const DashboardPage = () => {
+type TabType = 'listed' | 'purchased'
+
+const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
   const account = useWalletStore((state) => state.account)
   const isConnected = useWalletStore((state) => state.isConnected)
@@ -29,8 +31,8 @@ const DashboardPage = () => {
   const success = useToastStore((state) => state.success)
   const info = useToastStore((state) => state.info)
   const { t } = useI18n()
-  const [activeTab, setActiveTab] = useState('listed') // listed, purchased
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [activeTab, setActiveTab] = useState<TabType>('listed')
+  const [deleteConfirm, setDeleteConfirm] = useState<NFT | null>(null)
 
   if (!isConnected) {
     return (
@@ -53,7 +55,7 @@ const DashboardPage = () => {
 
   const { listed, purchased } = getUserNFTs(account)
 
-  const handleDelete = (nft) => {
+  const handleDelete = (nft: NFT) => {
     setDeleteConfirm(nft)
   }
 
@@ -65,7 +67,7 @@ const DashboardPage = () => {
     }
   }
 
-  const handleUnlist = (nft) => {
+  const handleUnlist = (nft: NFT) => {
     updateNFT(nft.id, { status: 'sold' })
     info(t('toast.nftUnlisted'))
   }
@@ -237,4 +239,3 @@ const DashboardPage = () => {
 }
 
 export default DashboardPage
-

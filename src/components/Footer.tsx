@@ -1,10 +1,11 @@
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { Github, Twitter, Mail } from 'lucide-react'
 import { useI18n } from '../stores/useI18nStore'
 
-const Footer = () => {
+const Footer: React.FC = () => {
   const { t } = useI18n()
-  
+
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -107,5 +108,3 @@ const Footer = () => {
 }
 
 export default Footer
-
-

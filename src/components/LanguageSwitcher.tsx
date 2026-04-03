@@ -2,14 +2,14 @@ import { Globe } from 'lucide-react'
 import { useI18n } from '../stores/useI18nStore'
 import { useState, useRef, useEffect } from 'react'
 
-const LanguageSwitcher = () => {
+const LanguageSwitcher: React.FC = () => {
   const { language, changeLanguage, availableLanguages, languageNames } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
@@ -20,7 +20,7 @@ const LanguageSwitcher = () => {
     }
   }, [])
 
-  const handleLanguageChange = (lang) => {
+  const handleLanguageChange = (lang: typeof language) => {
     changeLanguage(lang)
     setIsOpen(false)
   }
@@ -60,6 +60,3 @@ const LanguageSwitcher = () => {
 }
 
 export default LanguageSwitcher
-
-
-

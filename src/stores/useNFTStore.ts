@@ -62,9 +62,10 @@ export const useNFTStore = create<NFTState>()(
           try {
             const txn = await mintNFT(nftData.creator, nftData.imageUrl, nftData.name)
             const confirmedTxn = await signAndSubmitTransaction(peraWallet, txn, nftData.creator)
-            // The confirmed transaction includes the created asset index
-            const assetId: number = confirmedTxn['asset-index'] ?? confirmedTxn.assetIndex
-            newNFT.assetId = assetId
+            // The confirmed transaction includes the created asset index (bigint in algosdk v3)
+            if (confirmedTxn.assetIndex !== undefined) {
+              newNFT.assetId = Number(confirmedTxn.assetIndex)
+            }
           } catch (err) {
             // Blockchain submission failed — surface it so the caller can show a toast
             throw err

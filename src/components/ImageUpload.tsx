@@ -1,17 +1,28 @@
+import React, { useCallback } from 'react'
 import { Upload, X } from 'lucide-react'
-import { useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 
-const ImageUpload = ({ image, onImageChange, maxSizeMB = 10 }) => {
+export interface ImageData {
+  file: File
+  preview: string
+}
+
+interface ImageUploadProps {
+  image: ImageData | null
+  onImageChange: (image: ImageData | null) => void
+  maxSizeMB?: number
+}
+
+const ImageUpload: React.FC<ImageUploadProps> = ({ image, onImageChange, maxSizeMB = 10 }) => {
   const onDrop = useCallback(
-    (acceptedFiles) => {
+    (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0]
         const reader = new FileReader()
         reader.onloadend = () => {
           onImageChange({
             file,
-            preview: reader.result,
+            preview: reader.result as string,
           })
         }
         reader.readAsDataURL(file)
@@ -82,4 +93,3 @@ const ImageUpload = ({ image, onImageChange, maxSizeMB = 10 }) => {
 }
 
 export default ImageUpload
-

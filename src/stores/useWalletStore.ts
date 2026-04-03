@@ -24,7 +24,7 @@ interface WalletState {
 
 export const useWalletStore = create<WalletState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       account: null,
       isConnected: false,
       isConnecting: false,
