@@ -1,18 +1,22 @@
 import { useEffect } from 'react'
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react'
-import { useToastStore } from '../stores/useToastStore'
+import { useToastStore, Toast as ToastType } from '../stores/useToastStore'
 
-const Toast = ({ toast }) => {
+interface ToastProps {
+  toast: ToastType
+}
+
+const Toast: React.FC<ToastProps> = ({ toast }) => {
   const removeToast = useToastStore((state) => state.removeToast)
 
-  const icons = {
+  const icons: Record<ToastType['type'], React.ElementType> = {
     success: CheckCircle,
     error: AlertCircle,
     warning: AlertTriangle,
     info: Info,
   }
 
-  const styles = {
+  const styles: Record<ToastType['type'], string> = {
     success: 'bg-green-50 border-green-200 text-green-900',
     error: 'bg-red-50 border-red-200 text-red-900',
     warning: 'bg-yellow-50 border-yellow-200 text-yellow-900',
@@ -52,7 +56,7 @@ const Toast = ({ toast }) => {
   )
 }
 
-const ToastContainer = () => {
+const ToastContainer: React.FC = () => {
   const toasts = useToastStore((state) => state.toasts)
 
   if (toasts.length === 0) return null
@@ -69,5 +73,3 @@ const ToastContainer = () => {
 }
 
 export default ToastContainer
-
-

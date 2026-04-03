@@ -4,10 +4,12 @@ import { useNFTStore } from '../stores/useNFTStore'
 import { useI18n } from '../stores/useI18nStore'
 import NFTCard from '../components/NFTCard'
 
-const MarketplacePage = () => {
+type FilterOption = 'all' | 'price-low' | 'price-high' | 'newest'
+
+const MarketplacePage: React.FC = () => {
   const nfts = useNFTStore((state) => state.nfts)
   const { t } = useI18n()
-  const [filter, setFilter] = useState('all') // all, price-low, price-high, newest
+  const [filter, setFilter] = useState<FilterOption>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   // Filter and sort NFTs
@@ -34,7 +36,7 @@ const MarketplacePage = () => {
         break
       case 'newest':
         result = [...result].sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
         break
       default:
@@ -73,7 +75,7 @@ const MarketplacePage = () => {
             <div className="relative">
               <select
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                onChange={(e) => setFilter(e.target.value as FilterOption)}
                 className="w-full md:w-48 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white cursor-pointer"
               >
                 <option value="all">{t('marketplace.allNFTs')}</option>
@@ -92,7 +94,7 @@ const MarketplacePage = () => {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-gray-600">
-            {filteredNFTs.length === 1 
+            {filteredNFTs.length === 1
               ? t('marketplace.nftFoundOne', { count: filteredNFTs.length })
               : t('marketplace.nftFoundMany', { count: filteredNFTs.length })}
           </p>
@@ -124,5 +126,3 @@ const MarketplacePage = () => {
 }
 
 export default MarketplacePage
-
-

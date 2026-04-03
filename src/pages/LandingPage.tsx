@@ -3,10 +3,16 @@ import { Link } from 'react-router-dom'
 import { useI18n } from '../stores/useI18nStore'
 import Button from '../components/Button'
 
-const LandingPage = () => {
+interface Step {
+  icon: React.ElementType
+  title: string
+  description: string
+}
+
+const LandingPage: React.FC = () => {
   const { t } = useI18n()
-  
-  const steps = [
+
+  const steps: Step[] = [
     {
       icon: Upload,
       title: t('landing.step1.title'),
@@ -183,5 +189,3 @@ const LandingPage = () => {
 }
 
 export default LandingPage
-
-

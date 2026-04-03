@@ -9,7 +9,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { useWalletStore } from '../stores/useWalletStore'
-import { useNFTStore } from '../stores/useNFTStore'
+import { useNFTStore, NFT } from '../stores/useNFTStore'
 import { useToastStore } from '../stores/useToastStore'
 import { useI18n } from '../stores/useI18nStore'
 import { NETWORK_INFO } from '../utils/constants'
@@ -18,8 +18,8 @@ import Button from '../components/Button'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
 
-const NFTDetailPage = () => {
-  const { id } = useParams()
+const NFTDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const account = useWalletStore((state) => state.account)
   const isConnected = useWalletStore((state) => state.isConnected)
@@ -31,23 +31,27 @@ const NFTDetailPage = () => {
   const showError = useToastStore((state) => state.error)
   const { t } = useI18n()
 
-  const [nft, setNft] = useState(null)
+  const [nft, setNft] = useState<NFT | undefined>(undefined)
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [isPurchasing, setIsPurchasing] = useState(false)
   const [purchaseSuccess, setPurchaseSuccess] = useState(false)
+
+  // Suppress unused variable warnings for connect/isConnected used conditionally
+  void isConnected
 
   useEffect(() => {
     const foundNFT = nfts.find((n) => n.id === id)
     setNft(foundNFT)
   }, [id, nfts])
 
-
   const handleBuyClick = () => {
-    if (!isConnected) {
+    if (!account) {
       setShowConnectModal(true)
       return
     }
+
+    if (!nft) return
 
     if (nft.creator === account) {
       showError(t('toast.cantBuyOwn'))
@@ -93,7 +97,6 @@ const NFTDetailPage = () => {
     )
   }
 
-  const isOwner = nft.owner === account
   const isCreator = nft.creator === account
   const isListed = nft.status === 'listed'
 
@@ -119,7 +122,7 @@ const NFTDetailPage = () => {
                 className="w-full h-full object-cover"
                 loading="lazy"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/600x600?text=NFT'
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=NFT'
                 }}
               />
             </div>
@@ -194,7 +197,7 @@ const NFTDetailPage = () => {
                 <p className="text-sm text-gray-900">{formatDate(nft.createdAt)}</p>
               </div>
 
-              {nft.royalty > 0 && (
+              {nft.royalty !== undefined && nft.royalty > 0 && (
                 <div className="bg-white rounded-xl p-4 border border-gray-200">
                   <div className="flex items-center text-gray-600 mb-2">
                     <span className="text-sm font-medium">{t('nftDetail.royalty')}</span>
@@ -372,4 +375,3 @@ const NFTDetailPage = () => {
 }
 
 export default NFTDetailPage
-

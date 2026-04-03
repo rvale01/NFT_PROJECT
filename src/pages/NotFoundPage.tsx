@@ -3,9 +3,9 @@ import { Home, ArrowLeft } from 'lucide-react'
 import { useI18n } from '../stores/useI18nStore'
 import Button from '../components/Button'
 
-const NotFoundPage = () => {
+const NotFoundPage: React.FC = () => {
   const { t } = useI18n()
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="text-center max-w-md">
@@ -40,5 +40,3 @@ const NotFoundPage = () => {
 }
 
 export default NotFoundPage
-
-

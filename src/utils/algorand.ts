@@ -1,4 +1,5 @@
 import algosdk from 'algosdk'
+import type { PendingTransactionResponse } from 'algosdk/dist/types/client/v2/algod/models/types'
 import { PeraWalletConnect } from '@perawallet/connect'
 
 // Algorand configuration
@@ -30,7 +31,7 @@ export interface PinataResponse {
 // configured the function falls back to returning a local data URL so the app
 // remains usable during development without credentials.
 export const uploadToIPFS = async (file: File): Promise<string> => {
-  const pinataJwt = import.meta.env.VITE_PINATA_JWT as string | undefined
+  const pinataJwt = (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env.VITE_PINATA_JWT
 
   if (pinataJwt) {
     const formData = new FormData()
@@ -98,9 +99,9 @@ export const mintNFT = async (
   try {
     const suggestedParams = await algodClient.getTransactionParams().do()
 
-    // Create NFT ASA
+    // Create NFT ASA (algosdk v3 uses 'sender' instead of 'from')
     const txn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
-      from: wallet,
+      sender: wallet,
       suggestedParams,
       total: 1, // NFTs are always 1-of-1
       decimals: 0,
@@ -131,9 +132,10 @@ export const transferNFT = async (
   try {
     const suggestedParams = await algodClient.getTransactionParams().do()
 
+    // algosdk v3 uses 'sender'/'receiver' instead of 'from'/'to'
     const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: wallet,
-      to: recipient,
+      sender: wallet,
+      receiver: recipient,
       amount: 1,
       assetIndex: assetId,
       suggestedParams,
@@ -151,17 +153,19 @@ export const signAndSubmitTransaction = async (
   peraWallet: PeraWalletConnect,
   txn: algosdk.Transaction,
   signerAddress: string
-): Promise<Record<string, unknown>> => {
+): Promise<PendingTransactionResponse> => {
   // Sign the transaction via Pera Wallet
   const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [signerAddress] }]])
 
   // signedTxns is an array of Uint8Array; send the first one
-  const { txId } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  // algosdk v3: sendRawTransaction returns PostTransactionsResponse with .txid (lowercase)
+  const result = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  const txid: string = result.txid
 
   // Wait up to 4 rounds for confirmation
-  const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4)
+  const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txid, 4)
 
-  return confirmedTxn as Record<string, unknown>
+  return confirmedTxn
 }
 
 // Format ALGO amount

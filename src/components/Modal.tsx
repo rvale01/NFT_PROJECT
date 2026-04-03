@@ -1,7 +1,15 @@
 import { X } from 'lucide-react'
 import { useEffect } from 'react'
 
-const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+interface ModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title?: string
+  children: React.ReactNode
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -15,7 +23,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
 
   if (!isOpen) return null
 
-  const sizes = {
+  const sizes: Record<'sm' | 'md' | 'lg' | 'xl', string> = {
     sm: 'max-w-md',
     md: 'max-w-2xl',
     lg: 'max-w-4xl',
@@ -54,4 +62,3 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
 }
 
 export default Modal
-

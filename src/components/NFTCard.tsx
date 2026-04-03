@@ -1,9 +1,13 @@
 import { Clock, User } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { NFT } from '../stores/useNFTStore'
 import { formatAddress, formatRelativeTime } from '../utils/helpers'
 
-const NFTCard = ({ nft }) => {
+interface NFTCardProps {
+  nft: NFT
+}
 
+const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
   return (
     <Link to={`/nft/${nft.id}`}>
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer animate-scale-in">
@@ -14,7 +18,7 @@ const NFTCard = ({ nft }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
             onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/400x400?text=NFT'
+              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400?text=NFT'
             }}
           />
           {nft.status === 'listed' && (
@@ -57,4 +61,3 @@ const NFTCard = ({ nft }) => {
 }
 
 export default NFTCard
-

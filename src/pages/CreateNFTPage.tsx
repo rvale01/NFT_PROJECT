@@ -2,7 +2,7 @@ import { AlertCircle, Info, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
-import ImageUpload from '../components/ImageUpload'
+import ImageUpload, { ImageData } from '../components/ImageUpload'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
 import { useI18n } from '../stores/useI18nStore'
@@ -12,7 +12,21 @@ import { useWalletStore } from '../stores/useWalletStore'
 import { uploadToIPFS } from '../utils/algorand'
 import { NETWORK_INFO } from '../utils/constants'
 
-const CreateNFTPage = () => {
+interface FormData {
+  name: string
+  description: string
+  price: string
+  royalty: string
+}
+
+interface FormErrors {
+  image?: string
+  name?: string
+  price?: string
+  royalty?: string
+}
+
+const CreateNFTPage: React.FC = () => {
   const navigate = useNavigate()
   const account = useWalletStore((state) => state.account)
   const isConnected = useWalletStore((state) => state.isConnected)
@@ -23,8 +37,8 @@ const CreateNFTPage = () => {
   const showError = useToastStore((state) => state.error)
   const { t } = useI18n()
 
-  const [image, setImage] = useState(null)
-  const [formData, setFormData] = useState({
+  const [image, setImage] = useState<ImageData | null>(null)
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
     price: '',
@@ -32,18 +46,18 @@ const CreateNFTPage = () => {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showWalletModal, setShowWalletModal] = useState(false)
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<FormErrors>({})
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-    if (errors[name]) {
+    if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [name]: '' }))
     }
   }
 
-  const validateForm = () => {
-    const newErrors = {}
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
 
     if (!image) {
       newErrors.image = t('create.errors.imageRequired')
@@ -65,7 +79,7 @@ const CreateNFTPage = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!validateForm()) {
@@ -81,17 +95,17 @@ const CreateNFTPage = () => {
 
     try {
       // Upload image (in production, this would upload to IPFS)
-      const imageUrl = await uploadToIPFS(image.file)
+      const imageUrl = await uploadToIPFS(image!.file)
 
       // Create NFT (with real on-chain mint if wallet is connected)
-      const nft = await createNFT(
+      await createNFT(
         {
           name: formData.name,
           description: formData.description,
           price: parseFloat(formData.price),
           royalty: formData.royalty ? parseFloat(formData.royalty) : 0,
           imageUrl,
-          creator: account,
+          creator: account ?? '',
         },
         peraWallet,
       )
@@ -310,4 +324,3 @@ const CreateNFTPage = () => {
 }
 
 export default CreateNFTPage
-
