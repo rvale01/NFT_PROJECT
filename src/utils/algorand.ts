@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import algosdk from 'algosdk'
 import { PeraWalletConnect } from '@perawallet/connect'
+import { SERVER_URL } from './constants'
 
 // Algorand configuration
 const ALGOD_TOKEN = ''
@@ -54,7 +55,7 @@ export const uploadToIPFS = async (file: File): Promise<string> => {
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await fetch('http://localhost:3001/api/upload', {
+  const response = await fetch(`${SERVER_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   })
@@ -186,7 +187,7 @@ export const mintAndPay = async (
 
   // ARC-3: assetURL points to a JSON metadata file and ends with #arc3
   // so Pera Wallet recognises the ASA as an NFT rather than a generic asset
-  const arc3Url = `http://localhost:3001/api/nfts/${nftId}/metadata#arc3`
+  const arc3Url = `${SERVER_URL}/api/nfts/${nftId}/metadata#arc3`
 
   const mintTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
     sender: buyerAddress,

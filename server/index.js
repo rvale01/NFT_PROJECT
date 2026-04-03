@@ -26,7 +26,8 @@ const upload = multer({ storage })
 // POST /api/upload — upload an image, returns { url }
 app.post('/api/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
-  res.json({ url: `http://localhost:${PORT}/uploads/${req.file.filename}` })
+  const publicUrl = process.env.SERVER_PUBLIC_URL ?? `http://localhost:${PORT}`
+  res.json({ url: `${publicUrl}/uploads/${req.file.filename}` })
 })
 
 // Map DB row (snake_case) to API response (camelCase)
