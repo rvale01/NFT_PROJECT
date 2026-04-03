@@ -5,6 +5,7 @@ import {
   Plus,
   Package,
   ShoppingBag,
+  Tag,
   Trash2,
   ExternalLink,
   AlertCircle,
@@ -18,7 +19,7 @@ import NFTCard from '../components/NFTCard'
 import Button from '../components/Button'
 import Modal from '../components/Modal'
 
-type TabType = 'listed' | 'purchased'
+type TabType = 'listed' | 'purchased' | 'sold'
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
@@ -55,7 +56,7 @@ const DashboardPage: React.FC = () => {
     )
   }
 
-  const { listed, purchased } = getUserNFTs(account)
+  const { listed, purchased, sold } = getUserNFTs(account)
 
   const handleDelete = (nft: NFT) => {
     setDeleteConfirm(nft)
@@ -130,6 +131,17 @@ const DashboardPage: React.FC = () => {
             <ShoppingBag size={18} className="inline mr-2" />
             {t('dashboard.myPurchases')} ({purchased.length})
           </button>
+          <button
+            onClick={() => setActiveTab('sold')}
+            className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+              activeTab === 'sold'
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Tag size={18} className="inline mr-2" />
+            {t('dashboard.mySales')} ({sold.length})
+          </button>
         </div>
 
         {/* Listed NFTs */}
@@ -202,6 +214,29 @@ const DashboardPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Sold NFTs */}
+        {activeTab === 'sold' && (
+          <div>
+            {sold.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {sold.map((nft) => (
+                  <NFTCard key={nft.id} nft={nft} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+                <Tag className="mx-auto text-gray-400 mb-4" size={48} />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {t('dashboard.noSales')}
+                </h3>
+                <p className="text-gray-600">
+                  {t('dashboard.noSalesDesc')}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
       {/* Delete Confirmation Modal */}
       <Modal

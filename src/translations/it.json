@@ -156,7 +156,10 @@
       "confirm": "Elimina",
       "cancel": "Annulla"
     },
-    "unlist": "Rimuovi dalla Vendita"
+    "unlist": "Rimuovi dalla Vendita",
+    "mySales": "Le Mie Vendite",
+    "noSales": "Nessuna vendita ancora",
+    "noSalesDesc": "Gli NFT che hai creato e venduto appariranno qui"
   },
   "wallet": {
     "connectRequired": "Connetti il Tuo Portafoglio",

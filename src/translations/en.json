@@ -156,7 +156,10 @@
       "confirm": "Delete",
       "cancel": "Cancel"
     },
-    "unlist": "Unlist"
+    "unlist": "Unlist",
+    "mySales": "My Sales",
+    "noSales": "No sales yet",
+    "noSalesDesc": "NFTs you've created and sold will appear here"
   },
   "wallet": {
     "connectRequired": "Connect Your Wallet",

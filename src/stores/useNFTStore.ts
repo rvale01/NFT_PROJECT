@@ -37,7 +37,7 @@ interface NFTState {
   updateNFT: (id: string, updates: Partial<NFT>) => Promise<void>
   deleteNFT: (id: string, peraWallet?: PeraWalletConnect | null) => Promise<void>
   buyNFT: (id: string, buyerAddress: string, peraWallet?: PeraWalletConnect | null) => Promise<boolean>
-  getUserNFTs: (account: string | null) => { listed: NFT[]; purchased: NFT[] }
+  getUserNFTs: (account: string | null) => { listed: NFT[]; purchased: NFT[]; sold: NFT[] }
 }
 
 export const useNFTStore = create<NFTState>()((set, get) => ({
@@ -154,11 +154,12 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
   },
 
   getUserNFTs: (account) => {
-    if (!account) return { listed: [], purchased: [] }
+    if (!account) return { listed: [], purchased: [], sold: [] }
     const nfts = get().nfts
     return {
       listed: nfts.filter((nft) => nft.creator === account && nft.status === 'listed'),
       purchased: nfts.filter((nft) => nft.owner === account && nft.status === 'minted'),
+      sold: nfts.filter((nft) => nft.creator === account && nft.status === 'minted'),
     }
   },
 }))

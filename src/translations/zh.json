@@ -156,7 +156,10 @@
       "confirm": "删除",
       "cancel": "取消"
     },
-    "unlist": "取消上架"
+    "unlist": "取消上架",
+    "mySales": "我的销售",
+    "noSales": "暂无销售",
+    "noSalesDesc": "您创建并出售的NFT将显示在这里"
   },
   "wallet": {
     "connectRequired": "连接您的钱包",
