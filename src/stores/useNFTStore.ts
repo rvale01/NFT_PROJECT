@@ -133,11 +133,18 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
 
     if (peraWallet && buyerAddress) {
       if (nft.assetId) {
-        // Resale: buyer opts-in and pays seller atomically, then the marketplace
-        // backend automatically clawbacks the ASA to the buyer — no seller action needed.
+        // Resale: buyer opts-in and pays seller atomically.
         await optInAndPay(peraWallet, buyerAddress, nft.creator, nft.price, nft.assetId)
+        // Record the new owner BEFORE triggering the clawback so the backend knows who to send the ASA to.
+        await get().updateNFT(id, {
+          status: 'minted',
+          owner: buyerAddress,
+          purchasedAt: new Date().toISOString(),
+          assetTransferred: true,
+        })
         const transferRes = await fetch(`${API_URL}/nfts/${id}/transfer`, { method: 'POST' })
         if (!transferRes.ok) throw new Error('Automatic transfer failed')
+        return true
       } else {
         // First sale: lazy mint — create the ASA and pay the seller atomically.
         const { assetId: newAssetId } = await mintAndPay(
