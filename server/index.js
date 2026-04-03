@@ -48,6 +48,28 @@ function rowToNFT(row) {
   }
 }
 
+// GET /api/nfts/:id/metadata — ARC-3 metadata so Pera Wallet recognises the ASA as an NFT
+app.get('/api/nfts/:id/metadata', (req, res) => {
+  try {
+    const row = db.prepare('SELECT * FROM nfts WHERE id = ?').get(req.params.id)
+    if (!row) return res.status(404).json({ error: 'NFT not found' })
+
+    res.json({
+      name: row.name,
+      description: row.description ?? '',
+      image: row.image_url,
+      image_mimetype: row.image_url?.match(/\.(png)$/i) ? 'image/png' : 'image/jpeg',
+      properties: {
+        royalty: row.royalty ? row.royalty / 100 : 0,
+        creator: row.creator,
+      },
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch metadata' })
+  }
+})
+
 // GET /api/nfts — return all NFTs, optionally filter by ?status=listed
 app.get('/api/nfts', (req, res) => {
   try {

@@ -137,7 +137,7 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
         buyerAddress,
         nft.creator,
         nft.price,
-        nft.imageUrl,
+        nft.id,
         nft.name,
       )
       assetId = id

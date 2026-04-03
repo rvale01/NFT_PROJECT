@@ -179,10 +179,14 @@ export const mintAndPay = async (
   buyerAddress: string,
   sellerAddress: string,
   priceAlgo: number,
-  metadataUrl: string,
+  nftId: string,
   name: string
 ): Promise<{ assetId: number }> => {
   const suggestedParams = await algodClient.getTransactionParams().do()
+
+  // ARC-3: assetURL points to a JSON metadata file and ends with #arc3
+  // so Pera Wallet recognises the ASA as an NFT rather than a generic asset
+  const arc3Url = `http://localhost:3001/api/nfts/${nftId}/metadata#arc3`
 
   const mintTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
     sender: buyerAddress,
@@ -196,7 +200,7 @@ export const mintAndPay = async (
     clawback: undefined,
     unitName: 'NFT',
     assetName: name.substring(0, 32),
-    assetURL: metadataUrl,
+    assetURL: arc3Url,
     assetMetadataHash: undefined,
   })
 
