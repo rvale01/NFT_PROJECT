@@ -1,5 +1,7 @@
 export const APP_NAME = 'AlgoNFT Marketplace'
 
+export const API_URL = 'http://localhost:3001/api'
+
 export interface NetworkInfo {
   name: string
   fee: number

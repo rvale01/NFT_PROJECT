@@ -11,14 +11,18 @@ import MarketplacePage from './pages/MarketplacePage'
 import NFTDetailPage from './pages/NFTDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { useWalletStore } from './stores/useWalletStore'
+import { useNFTStore } from './stores/useNFTStore'
 
 function App(): React.ReactElement {
   const initializeWallet = useWalletStore((state) => state.initialize)
+  const fetchNFTs = useNFTStore((state) => state.fetchNFTs)
 
   useEffect(() => {
     // Initialize wallet connection check on mount
     initializeWallet()
-  }, [initializeWallet])
+    // Load NFTs from the backend API
+    fetchNFTs()
+  }, [initializeWallet, fetchNFTs])
 
   return (
     <ErrorBoundary>

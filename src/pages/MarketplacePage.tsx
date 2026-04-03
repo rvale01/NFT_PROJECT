@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Filter, Grid } from 'lucide-react'
 import { useNFTStore } from '../stores/useNFTStore'
 import { useI18n } from '../stores/useI18nStore'
@@ -8,7 +8,12 @@ type FilterOption = 'all' | 'price-low' | 'price-high' | 'newest'
 
 const MarketplacePage: React.FC = () => {
   const nfts = useNFTStore((state) => state.nfts)
+  const fetchNFTs = useNFTStore((state) => state.fetchNFTs)
   const { t } = useI18n()
+
+  useEffect(() => {
+    fetchNFTs()
+  }, [fetchNFTs])
   const [filter, setFilter] = useState<FilterOption>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
