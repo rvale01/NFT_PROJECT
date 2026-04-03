@@ -173,6 +173,52 @@ export const destroyNFT = async (
   }
 }
 
+// Mint NFT and pay seller atomically in a single group transaction
+export const mintAndPay = async (
+  peraWallet: PeraWalletConnect,
+  buyerAddress: string,
+  sellerAddress: string,
+  priceAlgo: number,
+  metadataUrl: string,
+  name: string
+): Promise<{ assetId: number }> => {
+  const suggestedParams = await algodClient.getTransactionParams().do()
+
+  const mintTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
+    sender: buyerAddress,
+    suggestedParams,
+    total: 1,
+    decimals: 0,
+    defaultFrozen: false,
+    manager: buyerAddress,
+    reserve: buyerAddress,
+    freeze: undefined,
+    clawback: undefined,
+    unitName: 'NFT',
+    assetName: name.substring(0, 32),
+    assetURL: metadataUrl,
+    assetMetadataHash: undefined,
+  })
+
+  const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    sender: buyerAddress,
+    receiver: sellerAddress,
+    amount: algoToMicroalgos(priceAlgo),
+    suggestedParams,
+  })
+
+  algosdk.assignGroupID([mintTxn, payTxn])
+
+  const signedTxns = await peraWallet.signTransaction([
+    [{ txn: mintTxn, signers: [buyerAddress] }, { txn: payTxn, signers: [buyerAddress] }],
+  ])
+
+  const { txid } = await algodClient.sendRawTransaction(signedTxns).do()
+  const confirmed = await algosdk.waitForConfirmation(algodClient, txid, 4)
+
+  return { assetId: Number(confirmed.assetIndex) }
+}
+
 // Sign and submit a transaction using Pera Wallet, then wait for confirmation
 export const signAndSubmitTransaction = async (
   peraWallet: PeraWalletConnect,

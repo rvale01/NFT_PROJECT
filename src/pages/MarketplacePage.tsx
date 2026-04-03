@@ -19,7 +19,7 @@ const MarketplacePage: React.FC = () => {
 
   // Filter and sort NFTs
   const filteredNFTs = useMemo(() => {
-    let result = nfts.filter((nft) => nft.status === 'listed')
+    let result = nfts.filter((nft) => nft.status === 'listed' || nft.status === 'minted')
 
     // Search filter
     if (searchQuery) {

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { mintNFT, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
+import { mintAndPay, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
 import { API_URL } from '../utils/constants'
 
 export type NFTStatus = 'listed' | 'sold' | 'minted'
@@ -129,19 +129,18 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
     const nft = get().nfts.find((n) => n.id === id)
     if (!nft) return false
 
-    // Lazy minting: the NFT is minted on-chain at the moment of purchase.
-    // The buyer's wallet signs the ASA creation transaction and pays the fee.
+    // Lazy minting: mint the ASA and pay the seller atomically in one group tx.
     let assetId: number | undefined
     if (peraWallet && buyerAddress) {
-      try {
-        const txn = await mintNFT(buyerAddress, nft.imageUrl, nft.name)
-        const confirmedTxn = await signAndSubmitTransaction(peraWallet, txn, buyerAddress)
-        if (confirmedTxn.assetIndex !== undefined) {
-          assetId = Number(confirmedTxn.assetIndex)
-        }
-      } catch (err) {
-        throw err
-      }
+      const { assetId: id } = await mintAndPay(
+        peraWallet,
+        buyerAddress,
+        nft.creator,
+        nft.price,
+        nft.imageUrl,
+        nft.name,
+      )
+      assetId = id
     }
 
     await get().updateNFT(id, {
