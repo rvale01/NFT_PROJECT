@@ -1,5 +1,5 @@
+/// <reference types="vite/client" />
 import algosdk from 'algosdk'
-import type { PendingTransactionResponse } from 'algosdk/dist/types/client/v2/algod/models/types'
 import { PeraWalletConnect } from '@perawallet/connect'
 
 // Algorand configuration
@@ -31,7 +31,7 @@ export interface PinataResponse {
 // configured the function falls back to returning a local data URL so the app
 // remains usable during development without credentials.
 export const uploadToIPFS = async (file: File): Promise<string> => {
-  const pinataJwt = (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env.VITE_PINATA_JWT
+  const pinataJwt = import.meta.env.VITE_PINATA_JWT as string | undefined
 
   if (pinataJwt) {
     const formData = new FormData()
@@ -153,7 +153,7 @@ export const signAndSubmitTransaction = async (
   peraWallet: PeraWalletConnect,
   txn: algosdk.Transaction,
   signerAddress: string
-): Promise<PendingTransactionResponse> => {
+): Promise<Awaited<ReturnType<typeof algosdk.waitForConfirmation>>> => {
   // Sign the transaction via Pera Wallet
   const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [signerAddress] }]])
 

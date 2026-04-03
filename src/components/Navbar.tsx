@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Wallet, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useWalletStore } from '../stores/useWalletStore'
@@ -12,7 +12,6 @@ const Navbar: React.FC = () => {
   const disconnect = useWalletStore((state) => state.disconnect)
   const { t } = useI18n()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const navigate = useNavigate()
 
   const handleWalletClick = async () => {
     if (isConnected) {
@@ -26,9 +25,6 @@ const Navbar: React.FC = () => {
     if (!address) return ''
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
-
-  // Suppress unused navigate warning – kept for potential future use
-  void navigate
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
