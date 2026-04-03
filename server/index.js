@@ -4,7 +4,12 @@ import multer from 'multer'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
+import algosdk from 'algosdk'
 import db from './db.js'
+import { clawbackAddress, clawbackSk } from './wallet.js'
+
+const ALGOD_SERVER = 'https://testnet-api.algonode.cloud'
+const algodClient = new algosdk.Algodv2('', ALGOD_SERVER, 443)
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const uploadsDir = path.join(__dirname, 'uploads')
@@ -49,6 +54,44 @@ function rowToNFT(row) {
     assetTransferred: row.asset_transferred === 1,
   }
 }
+
+// GET /api/wallet/address — returns the marketplace clawback address
+app.get('/api/wallet/address', (_req, res) => {
+  res.json({ address: clawbackAddress })
+})
+
+// POST /api/nfts/:id/transfer — clawback transfer from seller to buyer (signed by marketplace wallet)
+app.post('/api/nfts/:id/transfer', async (req, res) => {
+  try {
+    const nft = db.prepare('SELECT * FROM nfts WHERE id = ?').get(req.params.id)
+    if (!nft) return res.status(404).json({ error: 'NFT not found' })
+    if (!nft.asset_id) return res.status(400).json({ error: 'NFT has no on-chain asset' })
+    if (!nft.owner) return res.status(400).json({ error: 'NFT has no buyer recorded' })
+    if (nft.asset_transferred) return res.status(400).json({ error: 'Asset already transferred' })
+
+    const suggestedParams = await algodClient.getTransactionParams().do()
+
+    // Clawback: move asset from seller (creator) to buyer (owner)
+    const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      sender: clawbackAddress,
+      receiver: nft.owner,
+      assetSender: nft.creator, // clawback from seller
+      amount: 1,
+      assetIndex: nft.asset_id,
+      suggestedParams,
+    })
+
+    const signedTxn = txn.signTxn(clawbackSk)
+    const { txid } = await algodClient.sendRawTransaction(signedTxn).do()
+    await algosdk.waitForConfirmation(algodClient, txid, 4)
+
+    db.prepare('UPDATE nfts SET asset_transferred = 1 WHERE id = ?').run(req.params.id)
+    res.json({ success: true, txid })
+  } catch (err) {
+    console.error('Clawback transfer error:', err)
+    res.status(500).json({ error: 'Transfer failed' })
+  }
+})
 
 // GET /api/nfts/:id/metadata — ARC-3 metadata so Pera Wallet recognises the ASA as an NFT
 app.get('/api/nfts/:id/metadata', (req, res) => {

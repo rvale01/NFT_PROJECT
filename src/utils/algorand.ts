@@ -241,6 +241,10 @@ export const mintAndPay = async (
   nftId: string,
   name: string
 ): Promise<{ assetId: number }> => {
+  // Fetch the marketplace clawback address so resales can be automatic
+  const walletRes = await fetch(`${SERVER_URL}/api/wallet/address`)
+  const { address: clawbackAddress } = await walletRes.json() as { address: string }
+
   const suggestedParams = await algodClient.getTransactionParams().do()
 
   // ARC-3: assetURL points to a JSON metadata file and ends with #arc3
@@ -256,7 +260,7 @@ export const mintAndPay = async (
     manager: buyerAddress,
     reserve: buyerAddress,
     freeze: undefined,
-    clawback: undefined,
+    clawback: clawbackAddress, // marketplace can move the NFT on resale without seller approval
     unitName: 'NFT',
     assetName: name.substring(0, 32),
     assetURL: arc3Url,
