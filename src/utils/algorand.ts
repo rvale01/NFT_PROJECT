@@ -2,11 +2,16 @@
 import algosdk from 'algosdk'
 import { PeraWalletConnect } from '@perawallet/connect'
 
-// Algorand configuration
+// Algorand configuration — defaults to testnet, override with VITE_ALGORAND_NETWORK=mainnet
+const isMainnet = import.meta.env.VITE_ALGORAND_NETWORK === 'mainnet'
 const ALGOD_TOKEN = ''
-const ALGOD_SERVER = 'https://testnet-api.algonode.cloud'
+const ALGOD_SERVER = isMainnet
+  ? 'https://mainnet-api.algonode.cloud'
+  : 'https://testnet-api.algonode.cloud'
 const ALGOD_PORT = 443
-const INDEXER_SERVER = 'https://testnet-idx.algonode.cloud'
+const INDEXER_SERVER = isMainnet
+  ? 'https://mainnet-idx.algonode.cloud'
+  : 'https://testnet-idx.algonode.cloud'
 const INDEXER_PORT = 443
 
 // Initialize clients
