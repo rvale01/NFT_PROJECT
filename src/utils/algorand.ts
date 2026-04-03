@@ -112,7 +112,7 @@ export const mintNFT = async (
       clawback: undefined,
       unitName: unitName.substring(0, 8), // Max 8 chars
       assetName: name.substring(0, 32), // Max 32 chars
-      assetURL: metadataUrl,
+      assetURL: metadataUrl.length <= 96 ? metadataUrl : undefined, // Max 96 bytes
       assetMetadataHash: undefined,
     })
 
