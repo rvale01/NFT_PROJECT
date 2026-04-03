@@ -20,15 +20,38 @@ export const indexerClient = new algosdk.Indexer(
   INDEXER_PORT
 )
 
-// Helper to upload image to IPFS (placeholder - in production use actual IPFS service)
+// Helper to upload image to IPFS via Pinata pinning service.
+// Requires VITE_PINATA_JWT to be set in the environment. If the token is not
+// configured the function falls back to returning a local data URL so the app
+// remains usable during development without credentials.
 export const uploadToIPFS = async (file) => {
-  // In production, you would upload to IPFS here
-  // For now, we'll use a data URL as placeholder
+  const pinataJwt = import.meta.env.VITE_PINATA_JWT
+
+  if (pinataJwt) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${pinataJwt}`,
+      },
+      body: formData,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Pinata upload failed: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`
+  }
+
+  // Fallback: return a data URL when no Pinata JWT is configured
   return new Promise((resolve) => {
     const reader = new FileReader()
     reader.onloadend = () => {
-      // Return a placeholder URL - in production this would be an IPFS hash
-      resolve(reader.result) // This is a data URL, replace with IPFS hash in production
+      resolve(reader.result)
     }
     reader.readAsDataURL(file)
   })
@@ -93,6 +116,20 @@ export const transferNFT = async (wallet, assetId, recipient) => {
     console.error('Error creating transfer transaction:', error)
     throw error
   }
+}
+
+// Sign and submit a transaction using Pera Wallet, then wait for confirmation
+export const signAndSubmitTransaction = async (peraWallet, txn, signerAddress) => {
+  // Sign the transaction via Pera Wallet
+  const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [signerAddress] }]])
+
+  // signedTxns is an array of Uint8Array; send the first one
+  const { txId } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+
+  // Wait up to 4 rounds for confirmation
+  const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4)
+
+  return confirmedTxn
 }
 
 // Format ALGO amount

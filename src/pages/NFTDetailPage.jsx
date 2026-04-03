@@ -63,19 +63,9 @@ const NFTDetailPage = () => {
     setIsPurchasing(true)
 
     try {
-      // In production, this would:
-      // 1. Create mint transaction
-      // 2. Create payment transaction
-      // 3. Combine into atomic transfer
-      // 4. Sign with wallet
-      // 5. Submit to blockchain
+      const purchased = await buyNFT(nft.id, account, peraWallet)
 
-      // Simulate purchase for now
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      const success = await buyNFT(nft.id, account)
-
-      if (success) {
+      if (purchased) {
         setPurchaseSuccess(true)
         setShowBuyModal(false)
         success(t('toast.purchaseSuccess'))
