@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { mintNFT, transferNFT, signAndSubmitTransaction } from '../utils/algorand'
+import { mintNFT, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
 
 export type NFTStatus = 'listed' | 'sold' | 'minted'
 
@@ -34,7 +34,7 @@ interface NFTState {
   initialize: () => void
   createNFT: (nftData: CreateNFTData, peraWallet?: PeraWalletConnect | null) => Promise<NFT>
   updateNFT: (id: string, updates: Partial<NFT>) => void
-  deleteNFT: (id: string) => void
+  deleteNFT: (id: string, peraWallet?: PeraWalletConnect | null) => Promise<void>
   buyNFT: (id: string, buyerAddress: string, peraWallet?: PeraWalletConnect | null) => Promise<boolean>
   getUserNFTs: (account: string | null) => { listed: NFT[]; purchased: NFT[] }
 }
@@ -49,27 +49,15 @@ export const useNFTStore = create<NFTState>()(
         // NFTs are automatically loaded from localStorage by persist middleware
       },
 
-      createNFT: async (nftData, peraWallet) => {
+      createNFT: async (nftData, _peraWallet) => {
+        // Lazy minting: no on-chain transaction at creation time.
+        // The NFT is stored off-chain until a buyer purchases it,
+        // at which point the ASA is minted and the buyer pays the fee.
         const newNFT: NFT = {
           id: Date.now().toString(),
           ...nftData,
           status: 'listed',
           createdAt: new Date().toISOString(),
-        }
-
-        // Attempt real on-chain mint if wallet is available
-        if (peraWallet && nftData.creator) {
-          try {
-            const txn = await mintNFT(nftData.creator, nftData.imageUrl, nftData.name)
-            const confirmedTxn = await signAndSubmitTransaction(peraWallet, txn, nftData.creator)
-            // The confirmed transaction includes the created asset index (bigint in algosdk v3)
-            if (confirmedTxn.assetIndex !== undefined) {
-              newNFT.assetId = Number(confirmedTxn.assetIndex)
-            }
-          } catch (err) {
-            // Blockchain submission failed — surface it so the caller can show a toast
-            throw err
-          }
         }
 
         set((state) => ({ nfts: [newNFT, ...state.nfts] }))
@@ -82,9 +70,23 @@ export const useNFTStore = create<NFTState>()(
         }))
       },
 
-      deleteNFT: (id) => {
+      deleteNFT: async (id, peraWallet) => {
+        const nft = get().nfts.find((n) => n.id === id)
+        if (!nft) return
+
+        // Attempt real on-chain destroy if wallet and assetId are available
+        if (peraWallet && nft.assetId && nft.creator) {
+          try {
+            const txn = await destroyNFT(nft.creator, nft.assetId)
+            await signAndSubmitTransaction(peraWallet, txn, nft.creator)
+          } catch (err) {
+            // Blockchain submission failed — surface it so the caller can show a toast
+            throw err
+          }
+        }
+
         set((state) => ({
-          nfts: state.nfts.filter((nft) => nft.id !== id),
+          nfts: state.nfts.filter((n) => n.id !== id),
         }))
       },
 
@@ -92,13 +94,17 @@ export const useNFTStore = create<NFTState>()(
         const nft = get().nfts.find((n) => n.id === id)
         if (!nft) return false
 
-        // Attempt real on-chain transfer if wallet and assetId are available
-        if (peraWallet && nft.assetId && nft.creator) {
+        // Lazy minting: the NFT is minted on-chain at the moment of purchase.
+        // The buyer's wallet signs the ASA creation transaction and pays the fee.
+        let assetId: number | undefined
+        if (peraWallet && buyerAddress) {
           try {
-            const txn = await transferNFT(nft.creator, nft.assetId, buyerAddress)
-            await signAndSubmitTransaction(peraWallet, txn, nft.creator)
+            const txn = await mintNFT(buyerAddress, nft.imageUrl, nft.name)
+            const confirmedTxn = await signAndSubmitTransaction(peraWallet, txn, buyerAddress)
+            if (confirmedTxn.assetIndex !== undefined) {
+              assetId = Number(confirmedTxn.assetIndex)
+            }
           } catch (err) {
-            // Blockchain submission failed — surface it so the caller can show a toast
             throw err
           }
         }
@@ -107,6 +113,7 @@ export const useNFTStore = create<NFTState>()(
           status: 'minted',
           owner: buyerAddress,
           purchasedAt: new Date().toISOString(),
+          ...(assetId !== undefined && { assetId }),
         })
 
         return true

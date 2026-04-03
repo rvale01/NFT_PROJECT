@@ -31,7 +31,6 @@ const CreateNFTPage: React.FC = () => {
   const account = useWalletStore((state) => state.account)
   const isConnected = useWalletStore((state) => state.isConnected)
   const connect = useWalletStore((state) => state.connect)
-  const peraWallet = useWalletStore((state) => state.peraWallet)
   const createNFT = useNFTStore((state) => state.createNFT)
   const success = useToastStore((state) => state.success)
   const showError = useToastStore((state) => state.error)
@@ -98,17 +97,14 @@ const CreateNFTPage: React.FC = () => {
       const imageUrl = await uploadToIPFS(image!.file)
 
       // Create NFT (with real on-chain mint if wallet is connected)
-      await createNFT(
-        {
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          royalty: formData.royalty ? parseFloat(formData.royalty) : 0,
-          imageUrl,
-          creator: account ?? '',
-        },
-        peraWallet,
-      )
+      await createNFT({
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        royalty: formData.royalty ? parseFloat(formData.royalty) : 0,
+        imageUrl,
+        creator: account ?? '',
+      })
 
       success(t('toast.nftCreated'))
       setTimeout(() => {
