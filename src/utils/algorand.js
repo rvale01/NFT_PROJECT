@@ -1,14 +1,4 @@
-// #region agent log
-// H1: Log before algosdk import
-fetch('http://127.0.0.1:7242/ingest/6a246eaa-59bb-4532-828f-3f2f38f2a0df',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'algorand.js:1',message:'Before algosdk import',data:{globalDefined:typeof global !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-// #endregion
-
 import algosdk from 'algosdk'
-
-// #region agent log
-// H1: Log after algosdk import
-fetch('http://127.0.0.1:7242/ingest/6a246eaa-59bb-4532-828f-3f2f38f2a0df',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'algorand.js:4',message:'After algosdk import',data:{algosdkDefined:typeof algosdk !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-// #endregion
 
 // Algorand configuration
 const ALGOD_TOKEN = ''
