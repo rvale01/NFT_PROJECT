@@ -25,10 +25,12 @@ const DashboardPage: React.FC = () => {
   const account = useWalletStore((state) => state.account)
   const isConnected = useWalletStore((state) => state.isConnected)
   const connect = useWalletStore((state) => state.connect)
+  const peraWallet = useWalletStore((state) => state.peraWallet)
   const getUserNFTs = useNFTStore((state) => state.getUserNFTs)
   const deleteNFT = useNFTStore((state) => state.deleteNFT)
   const updateNFT = useNFTStore((state) => state.updateNFT)
   const success = useToastStore((state) => state.success)
+  const error = useToastStore((state) => state.error)
   const info = useToastStore((state) => state.info)
   const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<TabType>('listed')
@@ -59,11 +61,15 @@ const DashboardPage: React.FC = () => {
     setDeleteConfirm(nft)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteConfirm) {
-      deleteNFT(deleteConfirm.id)
-      success(t('toast.nftDeleted'))
-      setDeleteConfirm(null)
+      try {
+        await deleteNFT(deleteConfirm.id, peraWallet)
+        success(t('dashboard.deleteSuccess'))
+        setDeleteConfirm(null)
+      } catch (err) {
+        error(t('dashboard.deleteFailed'))
+      }
     }
   }
 

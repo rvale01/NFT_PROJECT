@@ -148,6 +148,27 @@ export const transferNFT = async (
   }
 }
 
+// Destroy (delete) an NFT ASA from the blockchain
+export const destroyNFT = async (
+  wallet: string,
+  assetId: number
+): Promise<algosdk.Transaction> => {
+  try {
+    const suggestedParams = await algodClient.getTransactionParams().do()
+
+    const txn = algosdk.makeAssetDestroyTxnWithSuggestedParamsFromObject({
+      sender: wallet,
+      assetIndex: assetId,
+      suggestedParams,
+    })
+
+    return txn
+  } catch (error) {
+    console.error('Error creating destroy transaction:', error)
+    throw error
+  }
+}
+
 // Sign and submit a transaction using Pera Wallet, then wait for confirmation
 export const signAndSubmitTransaction = async (
   peraWallet: PeraWalletConnect,
