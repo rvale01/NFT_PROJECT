@@ -95,6 +95,20 @@ export const transferNFT = async (wallet, assetId, recipient) => {
   }
 }
 
+// Sign and submit a transaction using Pera Wallet, then wait for confirmation
+export const signAndSubmitTransaction = async (peraWallet, txn, signerAddress) => {
+  // Sign the transaction via Pera Wallet
+  const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [signerAddress] }]])
+
+  // signedTxns is an array of Uint8Array; send the first one
+  const { txId } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+
+  // Wait up to 4 rounds for confirmation
+  const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4)
+
+  return confirmedTxn
+}
+
 // Format ALGO amount
 export const formatAlgo = (microalgos) => {
   return (microalgos / 1000000).toFixed(6)
