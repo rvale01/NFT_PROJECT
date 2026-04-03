@@ -4,9 +4,8 @@ import { PeraWalletConnect } from '@perawallet/connect'
 
 let peraWallet: PeraWalletConnect | null = null
 try {
-  const isMainnet = import.meta.env.VITE_ALGORAND_NETWORK === 'mainnet'
   peraWallet = new PeraWalletConnect({
-    chainId: isMainnet ? 416001 : 416002,
+    chainId: 416001, // Algorand Mainnet
   })
 } catch (error) {
   console.warn('PeraWalletConnect initialization failed:', error)
