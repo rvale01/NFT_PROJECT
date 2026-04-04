@@ -153,7 +153,7 @@ export const transferNFT = async (
   }
 }
 
-// Resale: buyer opts-in to existing ASA and pays seller atomically (buyer signs)
+// Resale: buyer opts-in to existing ASA (if needed) and pays seller atomically (buyer signs)
 export const optInAndPay = async (
   peraWallet: PeraWalletConnect,
   buyerAddress: string,
@@ -163,14 +163,15 @@ export const optInAndPay = async (
 ): Promise<void> => {
   const suggestedParams = await algodClient.getTransactionParams().do()
 
-  // Opt-in: buyer sends 0 of the asset to themselves to accept it
-  const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    sender: buyerAddress,
-    receiver: buyerAddress,
-    amount: 0,
-    assetIndex: assetId,
-    suggestedParams,
-  })
+  // Check if buyer already holds this asset (e.g. previously owned it) — if so skip opt-in
+  let alreadyOptedIn = false
+  try {
+    const accountInfo = await algodClient.accountAssetInformation(buyerAddress, assetId).do()
+    alreadyOptedIn = accountInfo['asset-holding'] !== undefined
+  } catch {
+    // accountAssetInformation throws if the account has never opted in — that's fine
+    alreadyOptedIn = false
+  }
 
   const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     sender: buyerAddress,
@@ -179,14 +180,30 @@ export const optInAndPay = async (
     suggestedParams,
   })
 
-  algosdk.assignGroupID([optInTxn, payTxn])
+  if (alreadyOptedIn) {
+    // Just pay — no opt-in needed
+    const signedTxns = await peraWallet.signTransaction([[{ txn: payTxn, signers: [buyerAddress] }]])
+    const { txid } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+    await algosdk.waitForConfirmation(algodClient, txid, 4)
+  } else {
+    // Opt-in: buyer sends 0 of the asset to themselves to accept it
+    const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      sender: buyerAddress,
+      receiver: buyerAddress,
+      amount: 0,
+      assetIndex: assetId,
+      suggestedParams,
+    })
 
-  const signedTxns = await peraWallet.signTransaction([
-    [{ txn: optInTxn, signers: [buyerAddress] }, { txn: payTxn, signers: [buyerAddress] }],
-  ])
+    algosdk.assignGroupID([optInTxn, payTxn])
 
-  const { txid } = await algodClient.sendRawTransaction(signedTxns).do()
-  await algosdk.waitForConfirmation(algodClient, txid, 4)
+    const signedTxns = await peraWallet.signTransaction([
+      [{ txn: optInTxn, signers: [buyerAddress] }, { txn: payTxn, signers: [buyerAddress] }],
+    ])
+
+    const { txid } = await algodClient.sendRawTransaction(signedTxns).do()
+    await algosdk.waitForConfirmation(algodClient, txid, 4)
+  }
 }
 
 // Resale: seller transfers the existing ASA to the buyer (seller signs)
