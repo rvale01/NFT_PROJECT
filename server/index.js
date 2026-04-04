@@ -68,6 +68,18 @@ app.post('/api/nfts/:id/transfer', async (req, res) => {
     if (!nft.asset_id) return res.status(400).json({ error: 'NFT has no on-chain asset' })
     if (!nft.owner) return res.status(400).json({ error: 'NFT has no buyer recorded' })
 
+    console.log(`[transfer] assetId=${nft.asset_id} from=${nft.creator} to=${nft.owner} clawback=${clawbackAddress}`)
+
+    // Check clawback wallet balance
+    const accountInfo = await algodClient.accountInformation(clawbackAddress).do()
+    const balance = Number(accountInfo.amount)
+    console.log(`[transfer] clawback wallet balance: ${balance} microALGO`)
+    if (balance < 1000) {
+      return res.status(500).json({
+        error: `Clawback wallet has insufficient funds (${balance} microALGO). Fund this address with testnet ALGO: ${clawbackAddress}`
+      })
+    }
+
     const suggestedParams = await algodClient.getTransactionParams().do()
 
     // Clawback: move asset from seller (creator) to buyer (owner)
