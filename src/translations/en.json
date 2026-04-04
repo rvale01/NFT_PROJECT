@@ -74,8 +74,8 @@
     "royalty": "Royalty Percentage (Optional)",
     "royaltyHint": "Percentage you'll earn from future sales (0-100%)",
     "lazyMintingInfo": {
-      "title": "About Lazy Minting",
-      "description": "This NFT will only be minted on the blockchain when someone buys it. The buyer pays a small fee (~{fee} {currency}) for minting. You pay nothing upfront."
+      "title": "About On-Chain Minting",
+      "description": "Your NFT will be minted as an Algorand Standard Asset (ASA) immediately when you list it. You'll need to approve a small transaction fee (~{fee} {currency}) in your wallet."
     },
     "listForSale": "List for Sale",
     "required": "required",

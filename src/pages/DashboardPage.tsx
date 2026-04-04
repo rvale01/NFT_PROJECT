@@ -9,14 +9,13 @@ import {
   Trash2,
   ExternalLink,
   AlertCircle,
-  Send,
 } from 'lucide-react'
 import { useWalletStore } from '../stores/useWalletStore'
 import { useNFTStore, NFT } from '../stores/useNFTStore'
 import { useToastStore } from '../stores/useToastStore'
 import { useI18n } from '../stores/useI18nStore'
 import { formatAddress } from '../utils/helpers'
-import { sendAsset } from '../utils/algorand'
+
 import NFTCard from '../components/NFTCard'
 import Button from '../components/Button'
 import Modal from '../components/Modal'
@@ -41,7 +40,6 @@ const DashboardPage: React.FC = () => {
   const [relistNFT, setRelistNFT] = useState<NFT | null>(null)
   const [relistPrice, setRelistPrice] = useState('')
   const [isRelisting, setIsRelisting] = useState(false)
-  const [isSendingAsset, setIsSendingAsset] = useState<string | null>(null)
 
   if (!isConnected) {
     return (
@@ -113,20 +111,6 @@ const DashboardPage: React.FC = () => {
     }
   }
 
-  const handleSendAsset = async (nft: NFT) => {
-    if (!account || !peraWallet || !nft.assetId || !nft.owner) return
-    setIsSendingAsset(nft.id)
-    try {
-      await sendAsset(peraWallet, account, nft.owner, nft.assetId)
-      await updateNFT(nft.id, { assetTransferred: true })
-      success(t('dashboard.assetSentSuccess'))
-    } catch {
-      error(t('dashboard.assetSentFailed'))
-    } finally {
-      setIsSendingAsset(null)
-    }
-  }
-
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,32 +121,6 @@ const DashboardPage: React.FC = () => {
             {t('dashboard.description')}
           </p>
         </div>
-
-        {/* Pending transfer banner */}
-        {sold.some((nft) => !nft.assetTransferred && nft.assetId) && (
-          <div className="bg-orange-50 border border-orange-300 rounded-2xl p-5 mb-8 flex items-start gap-4">
-            <AlertCircle className="text-orange-500 flex-shrink-0 mt-0.5" size={22} />
-            <div className="flex-1">
-              <p className="font-semibold text-orange-900 mb-1">{t('dashboard.pendingTransferTitle')}</p>
-              <p className="text-sm text-orange-800 mb-3">{t('dashboard.pendingTransferDesc')}</p>
-              <div className="flex flex-col gap-2">
-                {sold.filter((nft) => !nft.assetTransferred && nft.assetId).map((nft) => (
-                  <div key={nft.id} className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-orange-200">
-                    <span className="font-medium text-gray-900 text-sm">{nft.name}</span>
-                    <button
-                      onClick={() => handleSendAsset(nft)}
-                      disabled={isSendingAsset === nft.id}
-                      className="flex items-center gap-2 bg-orange-500 text-white py-1.5 px-4 rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium disabled:opacity-50"
-                    >
-                      <Send size={14} />
-                      {isSendingAsset === nft.id ? t('common.loading') : t('dashboard.transferNFT')}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Wallet Info */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
@@ -308,18 +266,6 @@ const DashboardPage: React.FC = () => {
                 {sold.map((nft) => (
                   <div key={nft.id} className="relative group">
                     <NFTCard nft={nft} />
-                    {!nft.assetTransferred && nft.assetId && (
-                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-white border-t border-gray-100">
-                        <button
-                          onClick={() => handleSendAsset(nft)}
-                          disabled={isSendingAsset === nft.id}
-                          className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white py-2 px-3 rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium disabled:opacity-50"
-                        >
-                          <Send size={14} />
-                          {isSendingAsset === nft.id ? t('common.loading') : t('dashboard.transferNFT')}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

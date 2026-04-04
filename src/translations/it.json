@@ -74,8 +74,8 @@
     "royalty": "Percentuale Royalty (Opzionale)",
     "royaltyHint": "Percentuale che guadagnerai dalle vendite future (0-100%)",
     "lazyMintingInfo": {
-      "title": "Informazioni sul Lazy Minting",
-      "description": "Questo NFT sarà coniato sulla blockchain solo quando qualcuno lo acquisterà. L'acquirente paga una piccola commissione (~{fee} {currency}) per il conio. Tu non paghi nulla in anticipo."
+      "title": "Informazioni sul Conio",
+      "description": "Il tuo NFT verrà coniato come Algorand Standard Asset (ASA) immediatamente quando lo metti in vendita. Dovrai approvare una piccola commissione (~{fee} {currency}) nel tuo wallet."
     },
     "listForSale": "Metti in Vendita",
     "required": "obbligatorio",

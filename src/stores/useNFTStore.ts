@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { mintAndPay, optInOnly, payOnly, sendAsset, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
+import { mintAndSubmit, optInOnly, payOnly, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
 import { API_URL } from '../utils/constants'
 
 export type NFTStatus = 'listed' | 'sold' | 'minted'
@@ -54,10 +54,8 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
     set({ nfts: data })
   },
 
-  createNFT: async (nftData, _peraWallet) => {
-    // Lazy minting: no on-chain transaction at creation time.
-    // The NFT is stored off-chain until a buyer purchases it,
-    // at which point the ASA is minted and the buyer pays the fee.
+  createNFT: async (nftData, peraWallet) => {
+    // Step 1: persist the NFT record so we have an id for the metadata URL
     const res = await fetch(`${API_URL}/nfts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -67,7 +65,16 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
       const err = await res.json().catch(() => ({}))
       throw new Error(err.error || 'Failed to create NFT')
     }
-    const newNFT: NFT = await res.json()
+    let newNFT: NFT = await res.json()
+
+    // Step 2: mint the ASA on-chain immediately (creator signs)
+    if (peraWallet) {
+      const { assetId } = await mintAndSubmit(peraWallet, nftData.creator, newNFT.id, nftData.name)
+      // Step 3: store the assetId so resales can use the clawback flow
+      await get().updateNFT(newNFT.id, { assetId })
+      newNFT = { ...newNFT, assetId }
+    }
+
     set((state) => ({ nfts: [newNFT, ...state.nfts] }))
     return newNFT
   },
@@ -132,37 +139,24 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
     if (!nft) return false
 
     if (peraWallet && buyerAddress) {
-      if (nft.assetId) {
-        // Resale — 3 steps so ALGO only moves after the NFT is confirmed transferred:
-        // 1. Buyer opts-in to the ASA (or skips if already opted in)
-        await optInOnly(peraWallet, buyerAddress, nft.assetId)
-        // 2. Record buyer so backend knows who to clawback to, then trigger clawback
-        await get().updateNFT(id, {
-          status: 'minted',
-          owner: buyerAddress,
-          purchasedAt: new Date().toISOString(),
-          assetTransferred: false,
-        })
-        const transferRes = await fetch(`${API_URL}/nfts/${id}/transfer`, { method: 'POST' })
-        if (!transferRes.ok) throw new Error('Automatic transfer failed')
-        await get().updateNFT(id, { assetTransferred: true })
-        // 3. Buyer pays the seller now that the NFT is confirmed received
-        await payOnly(peraWallet, buyerAddress, nft.creator, nft.price)
-        return true
-      } else {
-        // First sale: lazy mint — create the ASA and pay the seller atomically.
-        const { assetId: newAssetId } = await mintAndPay(
-          peraWallet, buyerAddress, nft.creator, nft.price, nft.id, nft.name,
-        )
-        await get().updateNFT(id, {
-          status: 'minted',
-          owner: buyerAddress,
-          purchasedAt: new Date().toISOString(),
-          assetId: newAssetId,
-          assetTransferred: true, // minted directly to buyer, no separate transfer needed
-        })
-        return true
-      }
+      if (!nft.assetId) throw new Error('NFT has no on-chain asset — cannot purchase')
+
+      // 3-step flow so ALGO only moves after the NFT is confirmed transferred:
+      // 1. Buyer opts-in to the ASA (skipped if already opted in)
+      await optInOnly(peraWallet, buyerAddress, nft.assetId)
+      // 2. Record buyer so backend knows who to clawback to, then trigger clawback
+      await get().updateNFT(id, {
+        status: 'minted',
+        owner: buyerAddress,
+        purchasedAt: new Date().toISOString(),
+        assetTransferred: false,
+      })
+      const transferRes = await fetch(`${API_URL}/nfts/${id}/transfer`, { method: 'POST' })
+      if (!transferRes.ok) throw new Error('Automatic transfer failed')
+      await get().updateNFT(id, { assetTransferred: true })
+      // 3. Buyer pays the seller now that the NFT is confirmed received
+      await payOnly(peraWallet, buyerAddress, nft.creator, nft.price)
+      return true
     }
 
     await get().updateNFT(id, {

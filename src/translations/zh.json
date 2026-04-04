@@ -74,8 +74,8 @@
     "royalty": "版税百分比（可选）",
     "royaltyHint": "您将从未来销售中获得的百分比 (0-100%)",
     "lazyMintingInfo": {
-      "title": "关于延迟铸造",
-      "description": "此NFT只有在有人购买时才会在区块链上铸造。买家支付小额铸造费（~{fee} {currency}）。您无需预付任何费用。"
+      "title": "关于链上铸造",
+      "description": "您的NFT将在上架时立即作为Algorand标准资产（ASA）铸造。您需要在钱包中批准一笔小额交易费（~{fee} {currency}）。"
     },
     "listForSale": "上架销售",
     "required": "必填",

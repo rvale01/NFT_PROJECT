@@ -201,28 +201,6 @@ export const payOnly = async (
   await algosdk.waitForConfirmation(algodClient, txid, 4)
 }
 
-// Resale: seller transfers the existing ASA to the buyer (seller signs)
-export const sendAsset = async (
-  peraWallet: PeraWalletConnect,
-  sellerAddress: string,
-  buyerAddress: string,
-  assetId: number,
-): Promise<void> => {
-  const suggestedParams = await algodClient.getTransactionParams().do()
-
-  const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    sender: sellerAddress,
-    receiver: buyerAddress,
-    amount: 1,
-    assetIndex: assetId,
-    suggestedParams,
-  })
-
-  const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [sellerAddress] }]])
-  const { txid } = await algodClient.sendRawTransaction(signedTxns[0]).do()
-  await algosdk.waitForConfirmation(algodClient, txid, 4)
-}
-
 // Destroy (delete) an NFT ASA from the blockchain
 export const destroyNFT = async (
   wallet: string,
@@ -244,16 +222,15 @@ export const destroyNFT = async (
   }
 }
 
-// Mint NFT and pay seller atomically in a single group transaction
-export const mintAndPay = async (
+// Mint NFT ASA immediately (creator signs at listing time)
+// Sets the marketplace wallet as clawback so resales can be automatic
+export const mintAndSubmit = async (
   peraWallet: PeraWalletConnect,
-  buyerAddress: string,
-  sellerAddress: string,
-  priceAlgo: number,
+  creatorAddress: string,
   nftId: string,
-  name: string
+  name: string,
 ): Promise<{ assetId: number }> => {
-  // Fetch the marketplace clawback address so resales can be automatic
+  // Fetch the marketplace clawback address
   const walletRes = await fetch(`${SERVER_URL}/api/wallet/address`)
   const { address: clawbackAddress } = await walletRes.json() as { address: string }
 
@@ -264,13 +241,13 @@ export const mintAndPay = async (
   const arc3Url = `${SERVER_URL}/api/nfts/${nftId}/metadata#arc3`
 
   const mintTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
-    sender: buyerAddress,
+    sender: creatorAddress,
     suggestedParams,
     total: 1,
     decimals: 0,
     defaultFrozen: false,
-    manager: buyerAddress,
-    reserve: buyerAddress,
+    manager: creatorAddress,
+    reserve: creatorAddress,
     freeze: undefined,
     clawback: clawbackAddress, // marketplace can move the NFT on resale without seller approval
     unitName: 'NFT',
@@ -279,20 +256,8 @@ export const mintAndPay = async (
     assetMetadataHash: undefined,
   })
 
-  const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    sender: buyerAddress,
-    receiver: sellerAddress,
-    amount: algoToMicroalgos(priceAlgo),
-    suggestedParams,
-  })
-
-  algosdk.assignGroupID([mintTxn, payTxn])
-
-  const signedTxns = await peraWallet.signTransaction([
-    [{ txn: mintTxn, signers: [buyerAddress] }, { txn: payTxn, signers: [buyerAddress] }],
-  ])
-
-  const { txid } = await algodClient.sendRawTransaction(signedTxns).do()
+  const signedTxns = await peraWallet.signTransaction([[{ txn: mintTxn, signers: [creatorAddress] }]])
+  const { txid } = await algodClient.sendRawTransaction(signedTxns[0]).do()
   const confirmed = await algosdk.waitForConfirmation(algodClient, txid, 4)
 
   return { assetId: Number(confirmed.assetIndex) }
