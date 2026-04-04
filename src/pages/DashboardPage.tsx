@@ -5,6 +5,7 @@ import {
   Plus,
   Package,
   ShoppingBag,
+  Tag,
   Trash2,
   ExternalLink,
   AlertCircle,
@@ -14,25 +15,31 @@ import { useNFTStore, NFT } from '../stores/useNFTStore'
 import { useToastStore } from '../stores/useToastStore'
 import { useI18n } from '../stores/useI18nStore'
 import { formatAddress } from '../utils/helpers'
+
 import NFTCard from '../components/NFTCard'
 import Button from '../components/Button'
 import Modal from '../components/Modal'
 
-type TabType = 'listed' | 'purchased'
+type TabType = 'listed' | 'purchased' | 'sold'
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
   const account = useWalletStore((state) => state.account)
   const isConnected = useWalletStore((state) => state.isConnected)
   const connect = useWalletStore((state) => state.connect)
+  const peraWallet = useWalletStore((state) => state.peraWallet)
   const getUserNFTs = useNFTStore((state) => state.getUserNFTs)
   const deleteNFT = useNFTStore((state) => state.deleteNFT)
   const updateNFT = useNFTStore((state) => state.updateNFT)
   const success = useToastStore((state) => state.success)
+  const error = useToastStore((state) => state.error)
   const info = useToastStore((state) => state.info)
   const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<TabType>('listed')
   const [deleteConfirm, setDeleteConfirm] = useState<NFT | null>(null)
+  const [relistNFT, setRelistNFT] = useState<NFT | null>(null)
+  const [relistPrice, setRelistPrice] = useState('')
+  const [isRelisting, setIsRelisting] = useState(false)
 
   if (!isConnected) {
     return (
@@ -53,23 +60,55 @@ const DashboardPage: React.FC = () => {
     )
   }
 
-  const { listed, purchased } = getUserNFTs(account)
+  const { listed, purchased, sold } = getUserNFTs(account)
 
   const handleDelete = (nft: NFT) => {
     setDeleteConfirm(nft)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteConfirm) {
-      deleteNFT(deleteConfirm.id)
-      success(t('toast.nftDeleted'))
-      setDeleteConfirm(null)
+      try {
+        await deleteNFT(deleteConfirm.id, peraWallet)
+        success(t('dashboard.deleteSuccess'))
+        setDeleteConfirm(null)
+      } catch (err) {
+        error(t('dashboard.deleteFailed'))
+      }
     }
   }
 
   const handleUnlist = (nft: NFT) => {
     updateNFT(nft.id, { status: 'sold' })
     info(t('toast.nftUnlisted'))
+  }
+
+  const handleRelistOpen = (nft: NFT) => {
+    setRelistNFT(nft)
+    setRelistPrice(String(nft.price))
+  }
+
+  const handleRelistConfirm = async () => {
+    if (!relistNFT || !account) return
+    const price = parseFloat(relistPrice)
+    if (!price || price <= 0) return
+    setIsRelisting(true)
+    try {
+      await updateNFT(relistNFT.id, {
+        status: 'listed',
+        creator: account,
+        owner: undefined,
+        price,
+        purchasedAt: undefined,
+      })
+      success(t('dashboard.relistSuccess'))
+      setRelistNFT(null)
+      setRelistPrice('')
+    } catch {
+      error(t('dashboard.relistFailed'))
+    } finally {
+      setIsRelisting(false)
+    }
   }
 
   return (
@@ -124,6 +163,17 @@ const DashboardPage: React.FC = () => {
             <ShoppingBag size={18} className="inline mr-2" />
             {t('dashboard.myPurchases')} ({purchased.length})
           </button>
+          <button
+            onClick={() => setActiveTab('sold')}
+            className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+              activeTab === 'sold'
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Tag size={18} className="inline mr-2" />
+            {t('dashboard.mySales')} ({sold.length})
+          </button>
         </div>
 
         {/* Listed NFTs */}
@@ -176,7 +226,18 @@ const DashboardPage: React.FC = () => {
             {purchased.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {purchased.map((nft) => (
-                  <NFTCard key={nft.id} nft={nft} />
+                  <div key={nft.id} className="relative group">
+                    <NFTCard nft={nft} />
+                    <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleRelistOpen(nft)}
+                        className="bg-primary-600 text-white p-2 rounded-lg hover:bg-primary-700 transition-colors shadow-lg"
+                        title={t('dashboard.listForSale')}
+                      >
+                        <Tag size={16} />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -196,6 +257,69 @@ const DashboardPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Sold NFTs */}
+        {activeTab === 'sold' && (
+          <div>
+            {sold.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {sold.map((nft) => (
+                  <div key={nft.id} className="relative group">
+                    <NFTCard nft={nft} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+                <Tag className="mx-auto text-gray-400 mb-4" size={48} />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {t('dashboard.noSales')}
+                </h3>
+                <p className="text-gray-600">
+                  {t('dashboard.noSalesDesc')}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+      {/* Relist Modal */}
+      <Modal
+        isOpen={!!relistNFT}
+        onClose={() => { setRelistNFT(null); setRelistPrice('') }}
+        title={t('dashboard.relistTitle')}
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">{t('dashboard.relistDescription')}</p>
+          {relistNFT && (
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="font-semibold text-gray-900">{relistNFT.name}</p>
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('dashboard.relistPrice')}
+            </label>
+            <input
+              type="number"
+              value={relistPrice}
+              onChange={(e) => setRelistPrice(e.target.value)}
+              step="0.1"
+              min="0"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="10"
+            />
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" className="flex-1" onClick={() => { setRelistNFT(null); setRelistPrice('') }}>
+              {t('common.cancel')}
+            </Button>
+            <Button className="flex-1" onClick={handleRelistConfirm} disabled={isRelisting || !relistPrice || parseFloat(relistPrice) <= 0}>
+              {t('dashboard.relistConfirm')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal

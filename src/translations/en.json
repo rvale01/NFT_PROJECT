@@ -74,8 +74,8 @@
     "royalty": "Royalty Percentage (Optional)",
     "royaltyHint": "Percentage you'll earn from future sales (0-100%)",
     "lazyMintingInfo": {
-      "title": "About Lazy Minting",
-      "description": "This NFT will only be minted on the blockchain when someone buys it. The buyer pays a small fee (~{fee} {currency}) for minting. You pay nothing upfront."
+      "title": "About On-Chain Minting",
+      "description": "Your NFT will be minted as an Algorand Standard Asset (ASA) immediately when you list it. You'll need to approve a small transaction fee (~{fee} {currency}) in your wallet."
     },
     "listForSale": "List for Sale",
     "required": "required",
@@ -156,7 +156,22 @@
       "confirm": "Delete",
       "cancel": "Cancel"
     },
-    "unlist": "Unlist"
+    "unlist": "Unlist",
+    "mySales": "My Sales",
+    "noSales": "No sales yet",
+    "noSalesDesc": "NFTs you've created and sold will appear here",
+    "listForSale": "List for Sale",
+    "relistTitle": "List for Sale",
+    "relistDescription": "Set a new price to re-list this NFT on the marketplace.",
+    "relistPrice": "Price (ALGO)",
+    "relistConfirm": "List for Sale",
+    "relistSuccess": "NFT listed for sale",
+    "relistFailed": "Failed to list NFT",
+    "transferNFT": "Transfer NFT to Buyer",
+    "assetSentSuccess": "NFT transferred to buyer",
+    "assetSentFailed": "Transfer failed",
+    "pendingTransferTitle": "Action required — transfer NFT to buyer",
+    "pendingTransferDesc": "You have sold NFTs that are still in your wallet. Sign the transfer to send them to the buyer."
   },
   "wallet": {
     "connectRequired": "Connect Your Wallet",

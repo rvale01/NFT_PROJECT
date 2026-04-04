@@ -97,18 +97,15 @@ const CreateNFTPage: React.FC = () => {
       // Upload image (in production, this would upload to IPFS)
       const imageUrl = await uploadToIPFS(image!.file)
 
-      // Create NFT (with real on-chain mint if wallet is connected)
-      await createNFT(
-        {
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          royalty: formData.royalty ? parseFloat(formData.royalty) : 0,
-          imageUrl,
-          creator: account ?? '',
-        },
-        peraWallet,
-      )
+      // Create NFT and mint on-chain immediately (creator signs)
+      await createNFT({
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        royalty: formData.royalty ? parseFloat(formData.royalty) : 0,
+        imageUrl,
+        creator: account ?? '',
+      }, peraWallet)
 
       success(t('toast.nftCreated'))
       setTimeout(() => {

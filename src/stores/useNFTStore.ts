@@ -1,7 +1,7 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { mintNFT, transferNFT, signAndSubmitTransaction } from '../utils/algorand'
+import { mintAndSubmit, optInOnly, payOnly, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
+import { API_URL } from '../utils/constants'
 
 export type NFTStatus = 'listed' | 'sold' | 'minted'
 
@@ -18,6 +18,7 @@ export interface NFT {
   createdAt: string
   purchasedAt?: string
   assetId?: number
+  assetTransferred?: boolean
 }
 
 interface CreateNFTData {
@@ -32,97 +33,149 @@ interface CreateNFTData {
 interface NFTState {
   nfts: NFT[]
   initialize: () => void
+  fetchNFTs: () => Promise<void>
   createNFT: (nftData: CreateNFTData, peraWallet?: PeraWalletConnect | null) => Promise<NFT>
-  updateNFT: (id: string, updates: Partial<NFT>) => void
-  deleteNFT: (id: string) => void
+  updateNFT: (id: string, updates: Partial<NFT>) => Promise<void>
+  deleteNFT: (id: string, peraWallet?: PeraWalletConnect | null) => Promise<void>
   buyNFT: (id: string, buyerAddress: string, peraWallet?: PeraWalletConnect | null) => Promise<boolean>
-  getUserNFTs: (account: string | null) => { listed: NFT[]; purchased: NFT[] }
+  getUserNFTs: (account: string | null) => { listed: NFT[]; purchased: NFT[]; sold: NFT[] }
 }
 
-export const useNFTStore = create<NFTState>()(
-  persist(
-    (set, get) => ({
-      nfts: [],
+export const useNFTStore = create<NFTState>()((set, get) => ({
+  nfts: [],
 
-      // Load NFTs from storage (handled by persist middleware)
-      initialize: () => {
-        // NFTs are automatically loaded from localStorage by persist middleware
-      },
+  // No-op: data is loaded via fetchNFTs()
+  initialize: () => {},
 
-      createNFT: async (nftData, peraWallet) => {
-        const newNFT: NFT = {
-          id: Date.now().toString(),
-          ...nftData,
-          status: 'listed',
-          createdAt: new Date().toISOString(),
-        }
+  fetchNFTs: async () => {
+    const res = await fetch(`${API_URL}/nfts`)
+    if (!res.ok) throw new Error('Failed to fetch NFTs')
+    const data: NFT[] = await res.json()
+    set({ nfts: data })
+  },
 
-        // Attempt real on-chain mint if wallet is available
-        if (peraWallet && nftData.creator) {
-          try {
-            const txn = await mintNFT(nftData.creator, nftData.imageUrl, nftData.name)
-            const confirmedTxn = await signAndSubmitTransaction(peraWallet, txn, nftData.creator)
-            // The confirmed transaction includes the created asset index (bigint in algosdk v3)
-            if (confirmedTxn.assetIndex !== undefined) {
-              newNFT.assetId = Number(confirmedTxn.assetIndex)
-            }
-          } catch (err) {
-            // Blockchain submission failed — surface it so the caller can show a toast
-            throw err
-          }
-        }
-
-        set((state) => ({ nfts: [newNFT, ...state.nfts] }))
-        return newNFT
-      },
-
-      updateNFT: (id, updates) => {
-        set((state) => ({
-          nfts: state.nfts.map((nft) => (nft.id === id ? { ...nft, ...updates } : nft)),
-        }))
-      },
-
-      deleteNFT: (id) => {
-        set((state) => ({
-          nfts: state.nfts.filter((nft) => nft.id !== id),
-        }))
-      },
-
-      buyNFT: async (id, buyerAddress, peraWallet) => {
-        const nft = get().nfts.find((n) => n.id === id)
-        if (!nft) return false
-
-        // Attempt real on-chain transfer if wallet and assetId are available
-        if (peraWallet && nft.assetId && nft.creator) {
-          try {
-            const txn = await transferNFT(nft.creator, nft.assetId, buyerAddress)
-            await signAndSubmitTransaction(peraWallet, txn, nft.creator)
-          } catch (err) {
-            // Blockchain submission failed — surface it so the caller can show a toast
-            throw err
-          }
-        }
-
-        get().updateNFT(id, {
-          status: 'minted',
-          owner: buyerAddress,
-          purchasedAt: new Date().toISOString(),
-        })
-
-        return true
-      },
-
-      getUserNFTs: (account) => {
-        if (!account) return { listed: [], purchased: [] }
-        const nfts = get().nfts
-        return {
-          listed: nfts.filter((nft) => nft.creator === account && nft.status === 'listed'),
-          purchased: nfts.filter((nft) => nft.owner === account && nft.status === 'minted'),
-        }
-      },
-    }),
-    {
-      name: 'nft-storage',
+  createNFT: async (nftData, peraWallet) => {
+    // Step 1: persist the NFT record so we have an id for the metadata URL
+    const res = await fetch(`${API_URL}/nfts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nftData),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || 'Failed to create NFT')
     }
-  )
-)
+    let newNFT: NFT = await res.json()
+
+    // Step 2: mint the ASA on-chain immediately (creator signs)
+    if (peraWallet) {
+      const { assetId } = await mintAndSubmit(peraWallet, nftData.creator, newNFT.id, nftData.name)
+      // Step 3: store the assetId so resales can use the clawback flow
+      await get().updateNFT(newNFT.id, { assetId })
+      newNFT = { ...newNFT, assetId }
+    }
+
+    set((state) => ({ nfts: [newNFT, ...state.nfts] }))
+    return newNFT
+  },
+
+  updateNFT: async (id, updates) => {
+    // Map camelCase fields to the shape expected by the API
+    const body: Record<string, unknown> = {}
+    if (updates.name !== undefined) body.name = updates.name
+    if (updates.description !== undefined) body.description = updates.description
+    if (updates.price !== undefined) body.price = updates.price
+    if (updates.royalty !== undefined) body.royalty = updates.royalty
+    if (updates.imageUrl !== undefined) body.imageUrl = updates.imageUrl
+    if (updates.creator !== undefined) body.creator = updates.creator
+    if ('owner' in updates) body.owner = updates.owner ?? null
+    if (updates.status !== undefined) body.status = updates.status
+    if ('purchasedAt' in updates) body.purchasedAt = updates.purchasedAt ?? null
+    if ('assetTransferred' in updates) body.assetTransferred = updates.assetTransferred
+    if (updates.assetId !== undefined) body.assetId = updates.assetId
+
+    const res = await fetch(`${API_URL}/nfts/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || 'Failed to update NFT')
+    }
+    const updatedNFT: NFT = await res.json()
+    set((state) => ({
+      nfts: state.nfts.map((nft) => (nft.id === id ? updatedNFT : nft)),
+    }))
+  },
+
+  deleteNFT: async (id, peraWallet) => {
+    const nft = get().nfts.find((n) => n.id === id)
+    if (!nft) return
+
+    // Attempt real on-chain destroy if wallet and assetId are available
+    if (peraWallet && nft.assetId && nft.creator) {
+      try {
+        const txn = await destroyNFT(nft.creator, nft.assetId)
+        await signAndSubmitTransaction(peraWallet, txn, nft.creator)
+      } catch (err) {
+        // Blockchain submission failed — surface it so the caller can show a toast
+        throw err
+      }
+    }
+
+    const res = await fetch(`${API_URL}/nfts/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || 'Failed to delete NFT')
+    }
+    set((state) => ({
+      nfts: state.nfts.filter((n) => n.id !== id),
+    }))
+  },
+
+  buyNFT: async (id, buyerAddress, peraWallet) => {
+    const nft = get().nfts.find((n) => n.id === id)
+    if (!nft) return false
+
+    if (peraWallet && buyerAddress) {
+      if (!nft.assetId) throw new Error('NFT has no on-chain asset — cannot purchase')
+
+      // 3-step flow so ALGO only moves after the NFT is confirmed transferred:
+      // 1. Buyer opts-in to the ASA (skipped if already opted in)
+      await optInOnly(peraWallet, buyerAddress, nft.assetId)
+      // 2. Record buyer so backend knows who to clawback to, then trigger clawback
+      await get().updateNFT(id, {
+        status: 'minted',
+        owner: buyerAddress,
+        purchasedAt: new Date().toISOString(),
+        assetTransferred: false,
+      })
+      const transferRes = await fetch(`${API_URL}/nfts/${id}/transfer`, { method: 'POST' })
+      if (!transferRes.ok) throw new Error('Automatic transfer failed')
+      await get().updateNFT(id, { assetTransferred: true })
+      // 3. Buyer pays the seller now that the NFT is confirmed received
+      await payOnly(peraWallet, buyerAddress, nft.creator, nft.price)
+      return true
+    }
+
+    await get().updateNFT(id, {
+      status: 'minted',
+      owner: buyerAddress,
+      purchasedAt: new Date().toISOString(),
+      assetTransferred: true,
+    })
+
+    return true
+  },
+
+  getUserNFTs: (account) => {
+    if (!account) return { listed: [], purchased: [], sold: [] }
+    const nfts = get().nfts
+    return {
+      listed: nfts.filter((nft) => nft.creator === account && nft.status === 'listed'),
+      purchased: nfts.filter((nft) => nft.owner === account && nft.status === 'minted'),
+      sold: nfts.filter((nft) => nft.creator === account && nft.status === 'minted'),
+    }
+  },
+}))

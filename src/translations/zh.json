@@ -74,8 +74,8 @@
     "royalty": "版税百分比（可选）",
     "royaltyHint": "您将从未来销售中获得的百分比 (0-100%)",
     "lazyMintingInfo": {
-      "title": "关于延迟铸造",
-      "description": "此NFT只有在有人购买时才会在区块链上铸造。买家支付小额铸造费（~{fee} {currency}）。您无需预付任何费用。"
+      "title": "关于链上铸造",
+      "description": "您的NFT将在上架时立即作为Algorand标准资产（ASA）铸造。您需要在钱包中批准一笔小额交易费（~{fee} {currency}）。"
     },
     "listForSale": "上架销售",
     "required": "必填",
@@ -156,7 +156,22 @@
       "confirm": "删除",
       "cancel": "取消"
     },
-    "unlist": "取消上架"
+    "unlist": "取消上架",
+    "mySales": "我的销售",
+    "noSales": "暂无销售",
+    "noSalesDesc": "您创建并出售的NFT将显示在这里",
+    "listForSale": "上架出售",
+    "relistTitle": "上架出售",
+    "relistDescription": "设置新价格以将此NFT重新上架。",
+    "relistPrice": "价格（ALGO）",
+    "relistConfirm": "上架出售",
+    "relistSuccess": "NFT已上架出售",
+    "relistFailed": "NFT上架失败",
+    "transferNFT": "转移NFT给买家",
+    "assetSentSuccess": "NFT已转移给买家",
+    "assetSentFailed": "转移失败",
+    "pendingTransferTitle": "需要操作 — 将NFT转移给买家",
+    "pendingTransferDesc": "您已出售的NFT仍在您的钱包中。请签署转移以将其发送给买家。"
   },
   "wallet": {
     "connectRequired": "连接您的钱包",

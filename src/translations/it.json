@@ -74,8 +74,8 @@
     "royalty": "Percentuale Royalty (Opzionale)",
     "royaltyHint": "Percentuale che guadagnerai dalle vendite future (0-100%)",
     "lazyMintingInfo": {
-      "title": "Informazioni sul Lazy Minting",
-      "description": "Questo NFT sarà coniato sulla blockchain solo quando qualcuno lo acquisterà. L'acquirente paga una piccola commissione (~{fee} {currency}) per il conio. Tu non paghi nulla in anticipo."
+      "title": "Informazioni sul Conio",
+      "description": "Il tuo NFT verrà coniato come Algorand Standard Asset (ASA) immediatamente quando lo metti in vendita. Dovrai approvare una piccola commissione (~{fee} {currency}) nel tuo wallet."
     },
     "listForSale": "Metti in Vendita",
     "required": "obbligatorio",
@@ -156,7 +156,22 @@
       "confirm": "Elimina",
       "cancel": "Annulla"
     },
-    "unlist": "Rimuovi dalla Vendita"
+    "unlist": "Rimuovi dalla Vendita",
+    "mySales": "Le Mie Vendite",
+    "noSales": "Nessuna vendita ancora",
+    "noSalesDesc": "Gli NFT che hai creato e venduto appariranno qui",
+    "listForSale": "Metti in Vendita",
+    "relistTitle": "Metti in Vendita",
+    "relistDescription": "Imposta un nuovo prezzo per rimettere questo NFT sul mercato.",
+    "relistPrice": "Prezzo (ALGO)",
+    "relistConfirm": "Metti in Vendita",
+    "relistSuccess": "NFT messo in vendita",
+    "relistFailed": "Impossibile mettere in vendita l'NFT",
+    "transferNFT": "Trasferisci NFT all'Acquirente",
+    "assetSentSuccess": "NFT trasferito all'acquirente",
+    "assetSentFailed": "Trasferimento fallito",
+    "pendingTransferTitle": "Azione richiesta — trasferisci l'NFT all'acquirente",
+    "pendingTransferDesc": "Hai venduto degli NFT che sono ancora nel tuo portafoglio. Firma il trasferimento per inviarli all'acquirente."
   },
   "wallet": {
     "connectRequired": "Connetti il Tuo Portafoglio",

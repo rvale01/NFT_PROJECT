@@ -1,6 +1,7 @@
+/// <reference types="vite/client" />
 import algosdk from 'algosdk'
-import type { PendingTransactionResponse } from 'algosdk/dist/types/client/v2/algod/models/types'
 import { PeraWalletConnect } from '@perawallet/connect'
+import { SERVER_URL } from './constants'
 
 // Algorand configuration
 const ALGOD_TOKEN = ''
@@ -26,12 +27,11 @@ export interface PinataResponse {
   IpfsHash: string
 }
 
-// Helper to upload image to IPFS via Pinata pinning service.
-// Requires VITE_PINATA_JWT to be set in the environment. If the token is not
-// configured the function falls back to returning a local data URL so the app
-// remains usable during development without credentials.
+// Upload image — uses Pinata IPFS if JWT is configured, otherwise falls back
+// to the local backend server (which serves a short URL safe for Algorand's
+// 96-byte assetURL limit).
 export const uploadToIPFS = async (file: File): Promise<string> => {
-  const pinataJwt = (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env.VITE_PINATA_JWT
+  const pinataJwt = import.meta.env.VITE_PINATA_JWT as string | undefined
 
   if (pinataJwt) {
     const formData = new FormData()
@@ -39,9 +39,7 @@ export const uploadToIPFS = async (file: File): Promise<string> => {
 
     const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${pinataJwt}`,
-      },
+      headers: { Authorization: `Bearer ${pinataJwt}` },
       body: formData,
     })
 
@@ -53,14 +51,21 @@ export const uploadToIPFS = async (file: File): Promise<string> => {
     return `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`
   }
 
-  // Fallback: return a data URL when no Pinata JWT is configured
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      resolve(reader.result as string)
-    }
-    reader.readAsDataURL(file)
+  // Fallback: upload to the local backend so we get a short URL
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(`${SERVER_URL}/api/upload`, {
+    method: 'POST',
+    body: formData,
   })
+
+  if (!response.ok) {
+    throw new Error('Image upload to backend failed')
+  }
+
+  const data = await response.json() as { url: string }
+  return data.url
 }
 
 export interface NFTMetadata {
@@ -148,12 +153,122 @@ export const transferNFT = async (
   }
 }
 
+// Resale step 1: buyer opts-in to the ASA so they can receive it (skip if already opted in)
+export const optInOnly = async (
+  peraWallet: PeraWalletConnect,
+  buyerAddress: string,
+  assetId: number,
+): Promise<void> => {
+  // Check if buyer already holds the asset slot (e.g. previously owned it)
+  try {
+    const accountInfo = await algodClient.accountAssetInformation(buyerAddress, assetId).do()
+    if (accountInfo['asset-holding'] !== undefined) return // already opted in, nothing to do
+  } catch {
+    // Never opted in — proceed with opt-in transaction
+  }
+
+  const suggestedParams = await algodClient.getTransactionParams().do()
+  const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    sender: buyerAddress,
+    receiver: buyerAddress,
+    amount: 0,
+    assetIndex: assetId,
+    suggestedParams,
+  })
+
+  const signedTxns = await peraWallet.signTransaction([[{ txn: optInTxn, signers: [buyerAddress] }]])
+  const { txid } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  await algosdk.waitForConfirmation(algodClient, txid, 4)
+}
+
+// Resale step 3: buyer pays the seller after the ASA has been transferred
+export const payOnly = async (
+  peraWallet: PeraWalletConnect,
+  buyerAddress: string,
+  sellerAddress: string,
+  priceAlgo: number,
+): Promise<void> => {
+  const suggestedParams = await algodClient.getTransactionParams().do()
+  const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    sender: buyerAddress,
+    receiver: sellerAddress,
+    amount: algoToMicroalgos(priceAlgo),
+    suggestedParams,
+  })
+
+  const signedTxns = await peraWallet.signTransaction([[{ txn: payTxn, signers: [buyerAddress] }]])
+  const { txid } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  await algosdk.waitForConfirmation(algodClient, txid, 4)
+}
+
+// Destroy (delete) an NFT ASA from the blockchain
+export const destroyNFT = async (
+  wallet: string,
+  assetId: number
+): Promise<algosdk.Transaction> => {
+  try {
+    const suggestedParams = await algodClient.getTransactionParams().do()
+
+    const txn = algosdk.makeAssetDestroyTxnWithSuggestedParamsFromObject({
+      sender: wallet,
+      assetIndex: assetId,
+      suggestedParams,
+    })
+
+    return txn
+  } catch (error) {
+    console.error('Error creating destroy transaction:', error)
+    throw error
+  }
+}
+
+// Mint NFT ASA immediately (creator signs at listing time)
+// Sets the marketplace wallet as clawback so resales can be automatic
+export const mintAndSubmit = async (
+  peraWallet: PeraWalletConnect,
+  creatorAddress: string,
+  nftId: string,
+  name: string,
+): Promise<{ assetId: number }> => {
+  // Fetch the marketplace clawback address
+  const walletRes = await fetch(`${SERVER_URL}/api/wallet/address`)
+  const { address: clawbackAddress } = await walletRes.json() as { address: string }
+
+  const suggestedParams = await algodClient.getTransactionParams().do()
+
+  // ARC-3: assetURL points to a JSON metadata file and ends with #arc3
+  // so Pera Wallet recognises the ASA as an NFT rather than a generic asset
+  const arc3Url = `${SERVER_URL}/api/nfts/${nftId}/metadata#arc3`
+
+  const mintTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
+    sender: creatorAddress,
+    suggestedParams,
+    total: 1,
+    decimals: 0,
+    defaultFrozen: false,
+    manager: creatorAddress,
+    reserve: creatorAddress,
+    freeze: undefined,
+    clawback: clawbackAddress, // marketplace can move the NFT on resale without seller approval
+    unitName: 'NFT',
+    assetName: name.substring(0, 32),
+    assetURL: arc3Url,
+    assetMetadataHash: undefined,
+  })
+
+  const signedTxns = await peraWallet.signTransaction([[{ txn: mintTxn, signers: [creatorAddress] }]])
+  const { txid } = await algodClient.sendRawTransaction(signedTxns[0]).do()
+  const confirmed = await algosdk.waitForConfirmation(algodClient, txid, 4)
+
+  return { assetId: Number(confirmed.assetIndex) }
+}
+
 // Sign and submit a transaction using Pera Wallet, then wait for confirmation
 export const signAndSubmitTransaction = async (
   peraWallet: PeraWalletConnect,
   txn: algosdk.Transaction,
   signerAddress: string
-): Promise<PendingTransactionResponse> => {
+): Promise<Awaited<ReturnType<typeof algosdk.waitForConfirmation>>> => {
   // Sign the transaction via Pera Wallet
   const signedTxns = await peraWallet.signTransaction([[{ txn, signers: [signerAddress] }]])
 

@@ -26,6 +26,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft }) => {
               Listed
             </div>
           )}
+          {nft.status === 'minted' && (
+            <div className="absolute top-3 right-3 bg-gray-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+              Sold
+            </div>
+          )}
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-lg text-gray-900 mb-2 truncate">
