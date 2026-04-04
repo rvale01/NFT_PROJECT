@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { mintAndPay, optInAndPay, sendAsset, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
+import { mintAndPay, optInOnly, payOnly, sendAsset, destroyNFT, signAndSubmitTransaction } from '../utils/algorand'
 import { API_URL } from '../utils/constants'
 
 export type NFTStatus = 'listed' | 'sold' | 'minted'
@@ -133,17 +133,21 @@ export const useNFTStore = create<NFTState>()((set, get) => ({
 
     if (peraWallet && buyerAddress) {
       if (nft.assetId) {
-        // Resale: buyer opts-in and pays seller atomically.
-        await optInAndPay(peraWallet, buyerAddress, nft.creator, nft.price, nft.assetId)
-        // Record the new owner BEFORE triggering the clawback so the backend knows who to send the ASA to.
+        // Resale — 3 steps so ALGO only moves after the NFT is confirmed transferred:
+        // 1. Buyer opts-in to the ASA (or skips if already opted in)
+        await optInOnly(peraWallet, buyerAddress, nft.assetId)
+        // 2. Record buyer so backend knows who to clawback to, then trigger clawback
         await get().updateNFT(id, {
           status: 'minted',
           owner: buyerAddress,
           purchasedAt: new Date().toISOString(),
-          assetTransferred: true,
+          assetTransferred: false,
         })
         const transferRes = await fetch(`${API_URL}/nfts/${id}/transfer`, { method: 'POST' })
         if (!transferRes.ok) throw new Error('Automatic transfer failed')
+        await get().updateNFT(id, { assetTransferred: true })
+        // 3. Buyer pays the seller now that the NFT is confirmed received
+        await payOnly(peraWallet, buyerAddress, nft.creator, nft.price)
         return true
       } else {
         // First sale: lazy mint — create the ASA and pay the seller atomically.

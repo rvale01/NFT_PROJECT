@@ -67,7 +67,6 @@ app.post('/api/nfts/:id/transfer', async (req, res) => {
     if (!nft) return res.status(404).json({ error: 'NFT not found' })
     if (!nft.asset_id) return res.status(400).json({ error: 'NFT has no on-chain asset' })
     if (!nft.owner) return res.status(400).json({ error: 'NFT has no buyer recorded' })
-    if (nft.asset_transferred) return res.status(400).json({ error: 'Asset already transferred' })
 
     const suggestedParams = await algodClient.getTransactionParams().do()
 
